@@ -1,0 +1,10 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+report.html
+.vscode
+src/components.d.ts
+src/auto-imports.d.ts
+.eslintrc-auto-import.json

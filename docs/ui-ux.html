@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>今天吃什么 · 幸运大转盘 · UI/UX 原型</title>
+  <meta name="theme-color" content="#6750A4" />
+  <!-- 引入 Google Fonts 的 Material Symbols 字体图标（可离线替换） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Material+Symbols+Rounded" rel="stylesheet">
+  <style>
+    /*
+      设计说明：
+      - 移动端优先（320-480）排版，使用 CSS Container 与媒体查询增强大屏体验
+      - 遵循 Material 3 色彩体系（以基色 #6750A4 为示例），细化状态层
+      - 使用 8dp 基线栅格、阴影层级与语义变量，保证一致性
+    */
+
+    :root {
+      /* Material 3 示例色板（可替换为品牌色） */
+      --md-sys-color-primary: #6750A4;    /* Primary */
+      --md-sys-color-on-primary: #FFFFFF; /* On Primary */
+      --md-sys-color-secondary: #625B71;  /* Secondary */
+      --md-sys-color-on-secondary: #FFFFFF;
+      --md-sys-color-surface: #FFFBFE;    /* Surface */
+      --md-sys-color-on-surface: #1C1B1F; /* On Surface */
+      --md-sys-color-outline: #79747E;    /* Outline */
+      --md-sys-color-surface-variant: #E7E0EC;
+      --md-sys-color-error: #B3261E;
+
+      /* 阴影层级（Material 阴影映射） */
+      --elevation-1: 0 1px 2px rgba(0,0,0,.14), 0 1px 3px 1px rgba(0,0,0,.12);
+      --elevation-2: 0 2px 4px rgba(0,0,0,.14), 0 3px 6px 2px rgba(0,0,0,.12);
+      --elevation-3: 0 4px 8px rgba(0,0,0,.14), 0 6px 12px 4px rgba(0,0,0,.12);
+
+      /* 动效曲线 */
+      --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+      --transition-duration: 280ms;
+
+      /* 尺寸基线 */
+      --radius-l: 20px;  /* 大圆角，如卡片、底部表单 */
+      --radius-m: 12px;  /* 中圆角，如弹出层 */
+      --radius-s: 8px;   /* 小圆角，如状态条 */
+
+      /* 布局基线 */
+      --safe-padding: 16px;
+      --max-content: 960px; /* 桌面端最大内容宽 */
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Roboto, system-ui, -apple-system, Segoe UI, Helvetica, Arial, "Microsoft Yahei", sans-serif;
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface);
+    }
+
+    /* 应用栏（Top App Bar / Center-aligned） */
+    .app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--md-sys-color-surface);
+      box-shadow: var(--elevation-1);
+      padding: 0 var(--safe-padding);
+    }
+    .app-title {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: .15px;
+    }
+
+    /* 主容器 */
+    .container {
+      margin: 0 auto;
+      max-width: var(--max-content);
+      padding: 16px var(--safe-padding) 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    /* 卡片（Material Card） */
+    .card {
+      background: #fff;
+      border-radius: var(--radius-l);
+      box-shadow: var(--elevation-1);
+      padding: 16px;
+    }
+
+    /* 主功能卡片：转盘区域 */
+    .wheel-card {
+      display: grid;
+      gap: 8px 16px;
+      justify-items: center;
+    }
+
+    /* 视觉焦点：幸运大转盘（Canvas + 指针叠加） */
+    .wheel-wrap {
+      position: relative;
+      width: min(92vw, 440px);
+      aspect-ratio: 1 / 1;
+    }
+    canvas#wheel {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+      box-shadow: var(--elevation-2);
+    }
+    .pointer {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+    .pointer:after {
+      content: '';
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 18px solid var(--md-sys-color-primary);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
+      transform: translateY(-42%);
+    }
+
+    /* FAB + 次按钮区 */
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-weight: 600;
+      letter-spacing: .25px;
+      cursor: pointer;
+      transition: transform var(--transition-duration) var(--easing-standard),
+                  box-shadow var(--transition-duration) var(--easing-standard),
+                  background var(--transition-duration) var(--easing-standard);
+    }
+    .btn:active { transform: translateY(1px) scale(.99); }
+
+    .btn-primary {
+      color: var(--md-sys-color-on-primary);
+      background: var(--md-sys-color-primary);
+      box-shadow: var(--elevation-2);
+    }
+    .btn-primary:hover { box-shadow: var(--elevation-3); }
+
+    .btn-tonal {
+      color: var(--md-sys-color-on-secondary);
+      background: var(--md-sys-color-surface-variant);
+    }
+
+    .btn-danger-tonal {
+      color: var(--md-sys-color-error);
+      background: #fff0f0;
+      border: 1px solid rgba(179,38,30,.35);
+    }
+
+    /* 辅助卡片：类别管理、筛选、选项列表 */
+    .panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* Chips */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--md-sys-color-outline);
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background var(--transition-duration) var(--easing-standard),
+                  border-color var(--transition-duration) var(--easing-standard);
+    }
+    .chip[aria-pressed="true"] {
+      background: var(--md-sys-color-surface-variant);
+      border-color: transparent;
+    }
+
+    /* 选项列表（支持编辑/收藏） */
+    .option-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--md-sys-color-surface-variant);
+      border-radius: var(--radius-s);
+      background: #fff;
+    }
+    .option-name { font-size: 14px; }
+    .option-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: none; background: transparent; cursor: pointer;
+    }
+
+    /* 表单：新增自定义选项 / 新增类别 */
+    .add-form {
+      display: grid; gap: 8px;
+      grid-template-columns: 1fr auto;
+      background: #fff; border-radius: var(--radius-l);
+      padding: 12px; box-shadow: var(--elevation-1);
+    }
+    .text-field {
+      display: grid; gap: 6px;
+    }
+    .text-field input {
+      height: 44px; padding: 0 12px;
+      border-radius: 8px; border: 1px solid var(--md-sys-color-outline);
+      outline: none; font-size: 15px;
+      transition: border-color var(--transition-duration) var(--easing-standard), box-shadow var(--transition-duration) var(--easing-standard);
+    }
+    .text-field input:focus {
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 3px rgba(103,80,164,.12);
+    }
+
+    /* 结果弹窗（Modal Bottom Sheet 风格） */
+    .sheet-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.28);
+      opacity: 0; pointer-events: none; transition: opacity var(--transition-duration) var(--easing-standard);
+    }
+    .sheet {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: #fff; border-top-left-radius: var(--radius-l); border-top-right-radius: var(--radius-l);
+      transform: translateY(100%);
+      transition: transform var(--transition-duration) var(--easing-standard);
+      box-shadow: var(--elevation-3);
+      padding: 16px;
+    }
+    .sheet-header { font-weight: 700; margin-bottom: 8px; }
+    .sheet-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+
+    .sheet-open .sheet-backdrop { opacity: 1; pointer-events: auto; }
+    .sheet-open .sheet { transform: translateY(0); }
+
+    /* 桌面端增强布局 */
+    @media (min-width: 768px) {
+      .container {
+        grid-template-columns: 1.2fr .8fr; /* 左转盘右面板 */
+        align-items: start;
+      }
+      .option-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部应用栏：品牌与页面定位 -->
+  <header class="app-bar" role="banner">
+    <div class="app-title">幸运大转盘 · 多类别原型</div>
+  </header>
+
+  <main class="container" role="main">
+    <!-- 左侧：核心功能卡片（大转盘） -->
+    <section class="card wheel-card" aria-labelledby="wheel-title">
+      <h1 id="wheel-title" class="section-title" style="margin:0">幸运大转盘</h1>
+      <div id="categoryLabel" style="font-size:13px;opacity:.75;">当前类别：<strong id="categoryName">—</strong></div>
+
+      <!-- 画布 + 指针：主交互对象 -->
+      <div class="wheel-wrap" aria-label="随机选择转盘">
+        <canvas id="wheel" width="600" height="600" aria-hidden="true"></canvas>
+        <div class="pointer" aria-hidden="true"></div>
+      </div>
+
+      <!-- 行为按钮：主要行为与次要行为 -->
+      <div class="actions">
+        <button id="spinBtn" class="btn btn-primary" aria-label="开始转动">
+          <span class="material-symbols-rounded" aria-hidden="true">autorenew</span>
+          开始转动
+        </button>
+        <button id="reshuffleBtn" class="btn btn-tonal" aria-label="重新分配选项">
+          <span class="material-symbols-rounded" aria-hidden="true">shuffle</span>
+          重排选项
+        </button>
+      </div>
+    </section>
+
+    <!-- 右侧：类别管理、筛选与选项管理面板 -->
+    <aside class="card panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="section-title" style="margin:0">类别管理与筛选</h2>
+
+      <!-- 类别 chips：支持切换当前类别 -->
+      <div class="chips" id="categoryChips" role="tablist" aria-label="类别"></div>
+
+      <!-- 类别操作 -->
+      <div class="actions" aria-label="类别操作">
+        <button id="renameCategoryBtn" class="btn btn-tonal" aria-label="重命名当前类别">
+          <span class="material-symbols-rounded" aria-hidden="true">edit</span> 重命名
+        </button>
+        <button id="deleteCategoryBtn" class="btn btn-danger-tonal" aria-label="删除当前类别">
+          <span class="material-symbols-rounded" aria-hidden="true">delete</span> 删除
+        </button>
+      </div>
+
+      <!-- 新增类别表单 -->
+      <form class="add-form" id="addCategoryForm" autocomplete="off">
+        <div class="text-field">
+          <label for="newCategory" style="font-size:12px;color:var(--md-sys-color-outline)">新增类别</label>
+          <input id="newCategory" name="newCategory" type="text" placeholder="例如：玩什么游戏英雄" aria-label="新增类别" />
+        </div>
+        <button class="btn btn-primary" type="submit" aria-label="添加类别">
+          <span class="material-symbols-rounded" aria-hidden="true">add</span>
+          添加
+        </button>
+      </form>
+
+      <!-- 筛选 chips（随类别变化） -->
+      <div class="chips" id="filterChips" role="group" aria-label="筛选条件"></div>
+
+      <!-- 选项列表：可编辑、收藏 -->
+      <div class="option-list" id="optionList" aria-label="当前类别的选项列表"></div>
+
+      <!-- 新增自定义选项输入表单（针对当前类别） -->
+      <form class="add-form" id="addForm" autocomplete="off">
+        <div class="text-field">
+          <label for="newOption" style="font-size:12px;color:var(--md-sys-color-outline)">新增选项（当前类别）</label>
+          <input id="newOption" name="newOption" type="text" placeholder="例如：麻辣烫 / 亚索" aria-label="新增选项" />
+        </div>
+        <button class="btn btn-primary" type="submit" aria-label="添加选项">
+          <span class="material-symbols-rounded" aria-hidden="true">add</span>
+          添加
+        </button>
+      </form>
+    </aside>
+  </main>
+
+  <!-- 结果弹出层（Bottom Sheet） -->
+  <div id="sheetRoot">
+    <div class="sheet-backdrop" aria-hidden="true"></div>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-describedby="resultDesc">
+      <div id="resultTitle" class="sheet-header">本次结果</div>
+      <div id="resultDesc">结果将基于转盘指针所指向的分区。</div>
+      <div class="sheet-actions">
+        <button id="favBtn" class="btn btn-tonal" aria-label="收藏这个选项">
+          <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
+          收藏
+        </button>
+        <button id="againBtn" class="btn btn-primary" aria-label="再转一次">
+          <span class="material-symbols-rounded" aria-hidden="true">autorenew</span>
+          再转一次
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /*
+      交互与动效说明（产品视角）：
+      - 支持类别（大类）切换与增删改查：默认“今天吃什么”，可新增如“玩什么游戏英雄”；
+      - 不同类别拥有独立的选项池与标签；
+      - 过滤 Chips 随类别变化，来源于当前类别选项的标签集合；
+      - 点击“开始转动”触发 3~4.3 秒的旋转动效，停止后弹出结果 Bottom Sheet；
+    */
+
+    // 示例数据：两个类别（吃什么 / 游戏英雄）
+    const categories = [
+      {
+        id: 'food',
+        name: '今天吃什么',
+        items: [
+          { id: 1, name: '汉堡', tag: 'fast', favorite: false },
+          { id: 2, name: '披萨', tag: 'western', favorite: false },
+          { id: 3, name: '寿司', tag: 'japanese', favorite: false },
+          { id: 4, name: '麻辣烫', tag: 'chinese', favorite: false },
+          { id: 5, name: '盖饭', tag: 'fast', favorite: false },
+          { id: 6, name: '川菜', tag: 'chinese', favorite: false },
+          { id: 7, name: '意面', tag: 'western', favorite: false },
+          { id: 8, name: '拉面', tag: 'japanese', favorite: false }
+        ]
+      },
+      {
+        id: 'game-hero',
+        name: '玩什么游戏英雄',
+        items: [
+          { id: 1, name: '亚索', tag: 'fighter', favorite: false },
+          { id: 2, name: '拉克丝', tag: 'mage', favorite: false },
+          { id: 3, name: '盖伦', tag: 'tank', favorite: false },
+          { id: 4, name: '图奇', tag: 'marksman', favorite: false },
+          { id: 5, name: '锤石', tag: 'support', favorite: false }
+        ]
+      }
+    ];
+
+    // 全局状态
+    let activeCategoryId = categories[0].id;
+    let activeFilter = 'all';
+    let filteredOptions = [];
+
+    // 画布与转盘渲染
+    const wheelCanvas = document.getElementById('wheel');
+    const ctx = wheelCanvas.getContext('2d');
+    const size = wheelCanvas.width; // 600
+    const radius = size / 2;
+
+    // 色带（Material 协调色，明亮区分）
+    const sectorColors = [
+      '#EADDFF', '#FFD8E4', '#D0BCFF', '#BDE0FE',
+      '#F9DEC9', '#FCE1A8', '#C8E6C9', '#FFCDD2',
+      '#BBDEFB', '#FFE0B2', '#DCEDC8', '#F8BBD0'
+    ];
+
+    let currentRotation = 0; // 当前旋转弧度
+    let spinning = false;
+
+    // 工具函数
+    function getActiveCategory() {
+      return categories.find(c => c.id === activeCategoryId) || categories[0];
+    }
+    function setActiveCategory(id) {
+      activeCategoryId = id;
+      activeFilter = 'all';
+      renderCategoryTitle();
+      renderFilterChips();
+      drawWheel();
+      renderList();
+    }
+    function slugify(name) {
+      return (name || '')
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9\-]/g, '')
+        .slice(0, 24) || 'cat';
+    }
+    function getCurrentOptions() {
+      const items = getActiveCategory().items || [];
+      if (activeFilter === 'all') return [...items];
+      return items.filter(o => o.tag === activeFilter);
+    }
+    function getAllTagsOfActiveCategory() {
+      const items = getActiveCategory().items || [];
+      const set = new Set(items.map(o => o.tag).filter(Boolean));
+      return Array.from(set);
+    }
+
+    function drawWheel() {
+      filteredOptions = getCurrentOptions();
+      const count = Math.max(1, filteredOptions.length);
+      ctx.clearRect(0, 0, size, size);
+
+      const anglePer = (Math.PI * 2) / count;
+      ctx.save();
+      ctx.translate(radius, radius);
+      ctx.rotate(currentRotation);
+
+      for (let i = 0; i < count; i++) {
+        const start = i * anglePer;
+        const end = start + anglePer;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius - 8, start, end);
+        ctx.closePath();
+        ctx.fillStyle = sectorColors[i % sectorColors.length];
+        ctx.fill();
+
+        // 分区文字
+        ctx.save();
+        ctx.fillStyle = '#333';
+        ctx.rotate(start + anglePer / 2);
+        ctx.textAlign = 'right';
+        ctx.font = '16px Roboto';
+        ctx.fillText(filteredOptions[i]?.name ?? '—', radius - 24, 6);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    // 根据当前旋转角度计算焦点分区索引
+    function getFocusedIndex() {
+      const count = Math.max(1, filteredOptions.length);
+      const anglePer = (Math.PI * 2) / count;
+      // 指针朝上，画布 0 角在 x 轴，需要换算
+      const normalized = (Math.PI * 3/2 - currentRotation) % (Math.PI * 2);
+      const pos = (normalized + Math.PI * 2) % (Math.PI * 2);
+      return Math.floor(pos / anglePer) % count;
+    }
+
+    function openSheet(resultText) {
+      const sheetRoot = document.getElementById('sheetRoot');
+      sheetRoot.classList.add('sheet-open');
+      document.getElementById('resultDesc').textContent = resultText;
+    }
+    function closeSheet() {
+      const sheetRoot = document.getElementById('sheetRoot');
+      sheetRoot.classList.remove('sheet-open');
+    }
+
+    // 渲染：类别 chips
+    function renderCategoryChips() {
+      const wrap = document.getElementById('categoryChips');
+      wrap.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', String(cat.id === activeCategoryId));
+        btn.setAttribute('aria-pressed', String(cat.id === activeCategoryId));
+        btn.textContent = cat.name;
+        btn.addEventListener('click', () => setActiveCategory(cat.id));
+        wrap.appendChild(btn);
+      });
+    }
+
+    // 渲染：类别标题
+    function renderCategoryTitle() {
+      const cat = getActiveCategory();
+      document.getElementById('categoryName').textContent = cat?.name || '—';
+    }
+
+    // 渲染：筛选 chips（来源于当前类别的标签集合）
+    function renderFilterChips() {
+      const wrap = document.getElementById('filterChips');
+      wrap.innerHTML = '';
+      const chips = [ { key: 'all', label: '全部' }, ...getAllTagsOfActiveCategory().map(t => ({ key: t, label: t })) ];
+      chips.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.setAttribute('aria-pressed', String(ch.key === activeFilter));
+        btn.textContent = ch.label;
+        btn.addEventListener('click', () => {
+          activeFilter = ch.key;
+          renderFilterChips();
+          drawWheel();
+          renderList();
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    // 渲染选项列表（当前类别）
+    function renderList() {
+      const list = document.getElementById('optionList');
+      list.innerHTML = '';
+      const items = getCurrentOptions();
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'option-item';
+        el.innerHTML = `
+          <div class="option-name">${item.name}</div>
+          <div class="option-actions">
+            <button class="icon-btn" title="收藏" aria-label="收藏 ${item.name}" data-act="fav" data-id="${item.id}">
+              <span class="material-symbols-rounded" style="color:${item.favorite ? 'crimson':'#666'}">favorite</span>
+            </button>
+            <button class="icon-btn" title="删除" aria-label="删除 ${item.name}" data-act="del" data-id="${item.id}">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    // 列表按钮（收藏/删除）
+    document.getElementById('optionList').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      const act = btn.dataset.act;
+      const cat = getActiveCategory();
+      const idx = cat.items.findIndex(o => o.id === id);
+      if (idx < 0) return;
+      if (act === 'fav') {
+        cat.items[idx].favorite = !cat.items[idx].favorite;
+      } else if (act === 'del') {
+        cat.items.splice(idx, 1);
+      }
+      drawWheel();
+      renderFilterChips();
+      renderList();
+    });
+
+    // 新增选项（当前类别）
+    document.getElementById('addForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newOption');
+      const name = (input.value || '').trim();
+      if (!name) return;
+      const cat = getActiveCategory();
+      const id = Math.max(0, ...cat.items.map(o => o.id)) + 1;
+      // 默认将新选项的 tag 设为当前筛选（若为 all 则为空）
+      const tag = activeFilter === 'all' ? '' : activeFilter;
+      cat.items.push({ id, name, tag, favorite: false });
+      input.value = '';
+      drawWheel();
+      renderFilterChips();
+      renderList();
+    });
+
+    // 重排选项（仅视觉顺序变化）
+    document.getElementById('reshuffleBtn').addEventListener('click', () => {
+      const cat = getActiveCategory();
+      cat.items.sort(() => Math.random() - 0.5);
+      drawWheel();
+      renderList();
+    });
+
+    // 开始转动
+    document.getElementById('spinBtn').addEventListener('click', () => {
+      if (spinning) return;
+      spinning = true;
+
+      const items = getCurrentOptions();
+      const baseRounds = 4 + Math.floor(Math.random() * 2); // 4-5 圈
+      const targetIdx = Math.floor(Math.random() * Math.max(1, items.length));
+      const anglePer = (Math.PI * 2) / Math.max(1, items.length);
+      // 指针指向上方的角度（3π/2），计算目标角度
+      const targetAngle = (Math.PI * 3/2) - (targetIdx + 0.5) * anglePer;
+      const finalRotation = baseRounds * Math.PI * 2 + targetAngle;
+
+      const start = currentRotation;
+      const delta = ((finalRotation - start) % (Math.PI * 2)) + baseRounds * Math.PI * 2;
+      const duration = 3400 + Math.random() * 900; // 3.4 - 4.3秒
+      const startTs = performance.now();
+
+      function animate(ts) {
+        const t = Math.min(1, (ts - startTs) / duration);
+        // easeOutCubic
+        const k = 1 - Math.pow(1 - t, 3);
+        currentRotation = start + delta * k;
+        drawWheel();
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          const idx = getFocusedIndex();
+          const picked = getCurrentOptions()[idx];
+          openSheet(picked ? `建议：${picked.name}` : '暂无可用选项');
+        }
+      }
+      requestAnimationFrame(animate);
+    });
+
+    // 弹层按钮
+    document.getElementById('againBtn').addEventListener('click', () => {
+      closeSheet();
+      setTimeout(() => document.getElementById('spinBtn').click(), 180);
+    });
+    document.getElementById('favBtn').addEventListener('click', () => {
+      const idx = getFocusedIndex();
+      const items = getCurrentOptions();
+      const picked = items[idx];
+      if (!picked) return;
+      const cat = getActiveCategory();
+      const i = cat.items.findIndex(o => o.id === picked.id);
+      if (i >= 0) {
+        cat.items[i].favorite = true;
+        renderList();
+      }
+      closeSheet();
+    });
+
+    // 点击遮罩关闭
+    document.querySelector('.sheet-backdrop').addEventListener('click', closeSheet);
+
+    // 类别：重命名
+    document.getElementById('renameCategoryBtn').addEventListener('click', () => {
+      const cat = getActiveCategory();
+      const name = prompt('重命名类别：', cat.name);
+      if (!name) return;
+      cat.name = name.trim();
+      renderCategoryChips();
+      renderCategoryTitle();
+    });
+
+    // 类别：删除
+    document.getElementById('deleteCategoryBtn').addEventListener('click', () => {
+      if (categories.length <= 1) {
+        alert('至少保留一个类别');
+        return;
+      }
+      const cat = getActiveCategory();
+      const ok = confirm(`删除类别“${cat.name}”？其下所有选项将被移除。`);
+      if (!ok) return;
+      const idx = categories.findIndex(c => c.id === cat.id);
+      if (idx >= 0) categories.splice(idx, 1);
+      activeCategoryId = categories[0].id;
+      activeFilter = 'all';
+      renderCategoryChips();
+      renderCategoryTitle();
+      renderFilterChips();
+      drawWheel();
+      renderList();
+    });
+
+    // 类别：新增
+    document.getElementById('addCategoryForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newCategory');
+      const name = (input.value || '').trim();
+      if (!name) return;
+      let id = slugify(name);
+      if (categories.some(c => c.id === id)) id = `${id}-${Date.now().toString(36).slice(-4)}`;
+      categories.push({ id, name, items: [] });
+      input.value = '';
+      renderCategoryChips();
+      setActiveCategory(id);
+    });
+
+    // 初始渲染
+    renderCategoryChips();
+    setActiveCategory(activeCategoryId);
+    drawWheel();
+    renderList();
+  </script>
+</body>
+</html> 
