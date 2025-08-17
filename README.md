@@ -28,7 +28,7 @@
 - **样式预处理器**: SCSS
 - **代码规范**: ESLint + Prettier
 
-## 📦 安装与使用
+## 📦 安装与使用（前端）
 
 ### 环境要求
 - Node.js >= 16.0.0
@@ -172,3 +172,67 @@ order-takeout-turntable/
 ---
 
 ⭐ 如果这个项目对您有帮助，请给我们一个星标！
+
+---
+
+## 🗄️ 后端 API（NestJS + Prisma）
+
+仓库内新增 `apps/api` 提供数据库存储与同步能力。
+
+### 快速开始
+
+```bash
+cd apps/api
+npm i
+
+# 在 apps/api 目录创建 .env
+echo DATABASE_URL=mysql://root:password@localhost:3306/turntable > .env
+echo JWT_SECRET=change_me_in_prod >> .env
+echo CORS_ORIGINS=http://localhost:5173 >> .env
+echo PORT=3001 >> .env
+
+npm run prisma:generate
+npm run prisma:migrate
+npm run dev
+```
+
+基础路径：`/api/v1`
+
+- 认证
+  - `POST /auth/register`
+  - `POST /auth/login`
+  - `POST /auth/refresh`
+
+- 套餐 WheelSet
+  - `GET /wheel-sets`
+  - `POST /wheel-sets` { name }
+  - `GET /wheel-sets/:id`
+  - `PATCH /wheel-sets/:id` { name, version? }
+  - `DELETE /wheel-sets/:id`
+  - `POST /wheel-sets/:id/items`
+  - `PATCH /wheel-sets/:id/items/:itemId`
+  - `DELETE /wheel-sets/:id/items/:itemId`
+  - `POST /wheel-sets/:id/items:reorder` { items: [{ id, order }] }
+  - `POST /wheel-sets/import`  从前端本地存储导入
+
+前端本地存储键名：`wheel-turntable-data`
+
+导入 payload 示例（与前端 `src/stores/wheel.ts` 的 `AppState` 对齐，但仅使用 `wheelSets` 字段，忽略 `id/createdAt/updatedAt`）：
+
+```json
+{
+  "wheelSets": [
+    {
+      "name": "今天吃什么",
+      "items": [
+        { "name": "汉堡" },
+        { "name": "披萨" }
+      ]
+    }
+  ]
+}
+```
+
+导入规则：
+- 仅读取 `wheelSets[*].name` 与 `wheelSets[*].items[*].name|color`；顺序写入 `order`。
+- 数据按当前登录用户归属，旧的本地 `id` 与时间戳不会沿用。

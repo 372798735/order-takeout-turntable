@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  wheelSets WheelSet[]
+}
+
+model WheelSet {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  version   Int        @default(1)
+  items     WheelItem[]
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model WheelItem {
+  id        String   @id @default(cuid())
+  setId     String
+  name      String
+  color     String?
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  set       WheelSet @relation(fields: [setId], references: [id])
+
+  @@index([setId])
+}
+
+

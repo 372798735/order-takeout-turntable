@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { api } from "@/api/client";
 
 export interface WheelItem {
   id: string;
@@ -21,7 +22,7 @@ export interface AppState {
   lastResult: WheelItem | null;
 }
 
-const STORAGE_KEY = "wheel-turntable-data";
+const STORAGE_KEY = "wheel-turntable-data"; // 仅用于兼容一次性导入
 
 function nowISO() {
   return new Date().toISOString();
@@ -42,19 +43,29 @@ export const useWheelStore = defineStore("wheel", {
     },
   },
   actions: {
-    load() {
+    async load() {
+      // 1) 如果数据库为空且本地有旧数据，尝试导入一次
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const data: AppState = JSON.parse(raw);
-          this.$patch(data);
-        } else {
-          this.bootstrap();
+        const list = await api.get<WheelSet[]>("/wheel-sets");
+        if (!list || list.length === 0) {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const payload = JSON.parse(raw);
+            try {
+              await api.post("/wheel-sets/import", payload);
+            } catch { }
+          }
         }
-      } catch {
-        this.bootstrap();
+      } catch { }
+
+      // 2) 拉取数据库数据
+      const sets = await api.get<WheelSet[]>("/wheel-sets");
+      this.wheelSets = sets;
+      if (!this.currentWheelSetId && this.wheelSets.length > 0) {
+        this.currentWheelSetId = this.wheelSets[0].id;
       }
     },
+    // 持久化仅保留运行态（不再写入本地存储业务数据）
     save() {
       const data: AppState = {
         wheelSets: this.wheelSets,
@@ -62,23 +73,13 @@ export const useWheelStore = defineStore("wheel", {
         isSpinning: this.isSpinning,
         lastResult: this.lastResult,
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      try { localStorage.setItem(STORAGE_KEY + "-runtime", JSON.stringify(data)); } catch { }
     },
-    bootstrap() {
-      const demo: WheelSet = {
-        id: "food",
-        name: "今天吃什么",
-        items: [
-          { id: "1", name: "汉堡" },
-          { id: "2", name: "披萨" },
-          { id: "3", name: "寿司" },
-          { id: "4", name: "麻辣烫" },
-        ],
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-      };
-      this.wheelSets = [demo];
-      this.currentWheelSetId = demo.id;
+    async bootstrap() {
+      // 数据库版无需本地 demo，改为若无数据则创建一个默认套餐
+      const created = await api.post<WheelSet>("/wheel-sets", { name: "今天吃什么" });
+      this.wheelSets = [{ ...created, items: [] }];
+      this.currentWheelSetId = created.id;
       this.isSpinning = false;
       this.lastResult = null;
       this.save();
@@ -87,48 +88,44 @@ export const useWheelStore = defineStore("wheel", {
       this.currentWheelSetId = id;
       this.save();
     },
-    addSet(name: string) {
-      const id = `${Date.now()}`;
-      const set: WheelSet = {
-        id,
-        name,
-        items: [],
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-      };
-      this.wheelSets.push(set);
-      this.currentWheelSetId = id;
+    async addSet(name: string) {
+      const created = await api.post<WheelSet>("/wheel-sets", { name });
+      const detail = await api.get<WheelSet>(`/wheel-sets/${created.id}`);
+      this.wheelSets.unshift(detail);
+      this.currentWheelSetId = created.id;
       this.save();
     },
-    renameSet(id: string, name: string) {
-      const s = this.wheelSets.find((s) => s.id === id);
-      if (!s) return;
-      s.name = name;
-      s.updatedAt = nowISO();
-      this.save();
-    },
-    deleteSet(id: string) {
+    async renameSet(id: string, name: string) {
+      await api.patch(`/wheel-sets/${id}`, { name });
+      const detail = await api.get<WheelSet>(`/wheel-sets/${id}`);
       const idx = this.wheelSets.findIndex((s) => s.id === id);
-      if (idx < 0) return;
-      this.wheelSets.splice(idx, 1);
+      if (idx >= 0) this.wheelSets[idx] = detail;
+      this.save();
+    },
+    async deleteSet(id: string) {
+      await api.delete(`/wheel-sets/${id}`);
+      const idx = this.wheelSets.findIndex((s) => s.id === id);
+      if (idx >= 0) this.wheelSets.splice(idx, 1);
       if (this.currentWheelSetId === id) {
         this.currentWheelSetId = this.wheelSets[0]?.id ?? null;
       }
       this.save();
     },
-    addItem(setId: string, name: string) {
-      const s = this.wheelSets.find((s) => s.id === setId);
+    async addItem(setId: string, name: string) {
+      const s = this.wheelSets.find((x) => x.id === setId);
       if (!s) return;
-      s.items.push({ id: `${Date.now()}`, name });
-      s.updatedAt = nowISO();
+      const order = s.items.length;
+      await api.post(`/wheel-sets/${setId}/items`, { name, order });
+      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      const idx = this.wheelSets.findIndex((x) => x.id === setId);
+      if (idx >= 0) this.wheelSets[idx] = detail;
       this.save();
     },
-    removeItem(setId: string, itemId: string) {
-      const s = this.wheelSets.find((s) => s.id === setId);
-      if (!s) return;
-      const idx = s.items.findIndex((i) => i.id === itemId);
-      if (idx >= 0) s.items.splice(idx, 1);
-      s.updatedAt = nowISO();
+    async removeItem(setId: string, itemId: string) {
+      await api.delete(`/wheel-sets/${setId}/items/${itemId}`);
+      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      const idx = this.wheelSets.findIndex((x) => x.id === setId);
+      if (idx >= 0) this.wheelSets[idx] = detail;
       this.save();
     },
     setSpinning(v: boolean) {
@@ -139,31 +136,63 @@ export const useWheelStore = defineStore("wheel", {
       this.lastResult = item;
       this.save();
     },
-    updateSet(setId: string, payload: { name?: string; items?: WheelItem[] }) {
-      const s = this.wheelSets.find((s) => s.id === setId);
+    async updateSet(setId: string, payload: { name?: string; items?: WheelItem[] }) {
+      const s = this.wheelSets.find((x) => x.id === setId);
       if (!s) return;
-      if (typeof payload.name === "string") s.name = payload.name;
-      if (Array.isArray(payload.items)) s.items = payload.items;
-      s.updatedAt = nowISO();
+      // 更新名称
+      if (typeof payload.name === "string") {
+        await api.patch(`/wheel-sets/${setId}`, { name: payload.name });
+      }
+      // 对 items 做同步：
+      if (Array.isArray(payload.items)) {
+        // 先对现有项做增删改，再统一排序
+        const current = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+        const existingIds = new Set(current.items.map((i) => i.id));
+        const payloadIds = new Set(payload.items.map((i) => i.id));
+
+        // 删除不存在的
+        for (const it of current.items) {
+          if (!payloadIds.has(it.id)) {
+            await api.delete(`/wheel-sets/${setId}/items/${it.id}`);
+          }
+        }
+        // 新增不存在的
+        for (const [idx, it] of payload.items.entries()) {
+          if (!existingIds.has(it.id)) {
+            await api.post(`/wheel-sets/${setId}/items`, { name: it.name, order: idx });
+          } else {
+            await api.patch(`/wheel-sets/${setId}/items/${it.id}`, { name: it.name });
+          }
+        }
+        // 统一排序
+        await api.post(`/wheel-sets/${setId}/items:reorder`, {
+          items: payload.items.map((it, idx) => ({ id: it.id, order: idx })),
+        });
+      }
+      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      const idx = this.wheelSets.findIndex((x) => x.id === setId);
+      if (idx >= 0) this.wheelSets[idx] = detail;
       this.save();
     },
-    updateItemName(setId: string, itemId: string, name: string) {
-      const s = this.wheelSets.find((s) => s.id === setId);
-      if (!s) return;
-      const it = s.items.find((i) => i.id === itemId);
-      if (!it) return;
-      it.name = name;
-      s.updatedAt = nowISO();
+    async updateItemName(setId: string, itemId: string, name: string) {
+      await api.patch(`/wheel-sets/${setId}/items/${itemId}`, { name });
+      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      const idx = this.wheelSets.findIndex((x) => x.id === setId);
+      if (idx >= 0) this.wheelSets[idx] = detail;
       this.save();
     },
-    reorderItems(setId: string, fromIndex: number, toIndex: number) {
-      const s = this.wheelSets.find((s) => s.id === setId);
+    async reorderItems(setId: string, fromIndex: number, toIndex: number) {
+      const s = this.wheelSets.find((x) => x.id === setId);
       if (!s) return;
       const items = [...s.items];
       const [moved] = items.splice(fromIndex, 1);
       items.splice(toIndex, 0, moved);
-      s.items = items;
-      s.updatedAt = nowISO();
+      await api.post(`/wheel-sets/${setId}/items:reorder`, {
+        items: items.map((it, idx) => ({ id: it.id, order: idx })),
+      });
+      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      const idx = this.wheelSets.findIndex((x) => x.id === setId);
+      if (idx >= 0) this.wheelSets[idx] = detail;
       this.save();
     },
   },
