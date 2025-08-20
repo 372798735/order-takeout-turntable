@@ -8,7 +8,8 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-    app.enableCors({ origin: process.env.CORS_ORIGINS?.split(',') || true });
+    const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : true;
+    app.enableCors({ origin: allowedOrigins, credentials: true });
     const port = Number(process.env.PORT || 3001);
     await app.listen(port);
     // eslint-disable-next-line no-console

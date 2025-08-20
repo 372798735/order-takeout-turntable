@@ -6,7 +6,7 @@ export function setToken(token: string | null) {
 
 export function getApiBase(): string {
     const base = (import.meta as any)?.env?.VITE_API_BASE as string | undefined;
-    return (base && base.replace(/\/$/, '')) || 'http://localhost:3001/api/v1';
+    return (base && base.replace(/\/$/, '')) || '/api/v1';
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {

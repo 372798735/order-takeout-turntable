@@ -30,6 +30,32 @@ export const useAuthStore = defineStore('auth', {
         user: null,
     }),
     actions: {
+        phoneToEmail(phone: string): string {
+            return `${phone}@phone.local`;
+        },
+        setAuth(data: { accessToken: string; refreshToken: string; user: { id: string; email: string } }) {
+            this.accessToken = data.accessToken;
+            this.refreshToken = data.refreshToken;
+            this.user = data.user;
+            api.setToken(this.accessToken);
+            this.saveToStorage();
+        },
+        async registerWithPhone(phone: string, password: string) {
+            const email = this.phoneToEmail(phone);
+            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
+                '/auth/register',
+                { email, password },
+            );
+            this.setAuth(res);
+        },
+        async loginWithPhone(phone: string, password: string) {
+            const email = this.phoneToEmail(phone);
+            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
+                '/auth/login',
+                { email, password },
+            );
+            this.setAuth(res);
+        },
         loadFromStorage() {
             try {
                 const raw = localStorage.getItem(AUTH_KEY);
@@ -51,45 +77,14 @@ export const useAuthStore = defineStore('auth', {
             } catch { }
         },
         async ensureAuth() {
-            if (!this.accessToken) {
-                this.loadFromStorage();
-            }
-            if (this.accessToken) {
-                api.setToken(this.accessToken);
-                try {
-                    await api.get('/wheel-sets');
-                    return;
-                } catch {
-                    // token 失效，继续走注册/登录
-                }
-            }
-
-            const deviceId = getOrCreateDeviceId();
-            const email = `device-${deviceId}@local.dev`;
-            const password = `p-${deviceId}`;
-            try {
-                const reg = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
-                    '/auth/register',
-                    { email, password },
-                );
-                this.accessToken = reg.accessToken;
-                this.refreshToken = reg.refreshToken;
-                this.user = reg.user;
-                api.setToken(this.accessToken);
-                this.saveToStorage();
-                return;
-            } catch {
-                // 已注册则登录
-            }
-            const login = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
-                '/auth/login',
-                { email, password },
-            );
-            this.accessToken = login.accessToken;
-            this.refreshToken = login.refreshToken;
-            this.user = login.user;
+            if (!this.accessToken) this.loadFromStorage();
+            if (!this.accessToken) return;
             api.setToken(this.accessToken);
-            this.saveToStorage();
+            try {
+                await api.get('/wheel-sets');
+            } catch {
+                this.logout();
+            }
         },
         logout() {
             this.accessToken = null;

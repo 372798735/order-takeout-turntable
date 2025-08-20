@@ -15,6 +15,7 @@ app.use(pinia);
 app.use(router);
 app.use(ElementPlus, { locale: zhCn });
 const auth = useAuthStore();
+auth.loadFromStorage();
 auth.ensureAuth().finally(() => {
     app.mount('#app');
 });

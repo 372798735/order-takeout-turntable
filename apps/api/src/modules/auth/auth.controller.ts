@@ -1,10 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
+import { IsEmail, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 import { AuthService } from './auth.service';
 
 class RegisterDto {
+    @IsOptional()
     @IsEmail()
-    email!: string;
+    email?: string;
+
+    @IsOptional()
+    @Matches(/^1[3-9]\d{9}$/)
+    phone?: string;
 
     @IsString()
     @MinLength(6)
@@ -12,8 +17,13 @@ class RegisterDto {
 }
 
 class LoginDto {
+    @IsOptional()
     @IsEmail()
-    email!: string;
+    email?: string;
+
+    @IsOptional()
+    @Matches(/^1[3-9]\d{9}$/)
+    phone?: string;
 
     @IsString()
     password!: string;
@@ -30,12 +40,14 @@ export class AuthController {
 
     @Post('register')
     register(@Body() dto: RegisterDto) {
-        return this.auth.register(dto.email, dto.password);
+        if (!dto.email && !dto.phone) throw new BadRequestException('phone or email is required');
+        return this.auth.register(dto.email, dto.password, dto.phone);
     }
 
     @Post('login')
     login(@Body() dto: LoginDto) {
-        return this.auth.login(dto.email, dto.password);
+        if (!dto.email && !dto.phone) throw new BadRequestException('phone or email is required');
+        return this.auth.login(dto.email, dto.password, dto.phone);
     }
 
     @Post('refresh')
