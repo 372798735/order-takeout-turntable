@@ -8,9 +8,9 @@ COPY prisma ./prisma
 COPY src ./src
 
 RUN npm ci \
- && npm run prisma:generate \
- && npm run build \
- && npm prune --production
+    && npm run prisma:generate \
+    && npm run build \
+    && npm prune --production
 
 ENV NODE_ENV=production
 EXPOSE 3001

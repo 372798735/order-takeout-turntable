@@ -11,6 +11,13 @@
           <el-button type="primary" text @click="$router.push('/manage')" class="manage-btn">
             管理转盘
           </el-button>
+          <el-avatar
+            v-if="auth.user"
+            :size="36"
+            :src="auth.user?.avatar || defaultAvatar"
+            class="avatar"
+            @click="$router.push('/profile')"
+          />
         </div>
       </el-header>
 
@@ -104,18 +111,23 @@
   </el-config-provider>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useWheelStore, type WheelItem } from '@/stores/wheel';
+import { useWheelStore } from '@/stores/wheel';
 import WheelCanvas from '@/components/wheel/WheelCanvas.vue';
 import { ElMessage } from 'element-plus';
 import { MagicStick, Refresh, SuccessFilled } from '@element-plus/icons-vue';
+import { useAuthStore } from '@/stores/auth';
 
 const store = useWheelStore();
-const wheelRef = ref<InstanceType<typeof WheelCanvas> | null>(null);
+const wheelRef = ref(null);
+const auth = useAuthStore();
+const defaultAvatar =
+  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
 
 onMounted(() => {
   store.load();
+  auth.fetchMe().catch(() => {});
   // 避免刷新或中途离开页面时 isSpinning 被持久化导致按钮一直禁用
   store.setSpinning(false);
   // 若当前套餐无效（为空或已被删除），自动选中第一个
@@ -134,9 +146,9 @@ onMounted(() => {
 const wheelSets = computed(() => store.wheelSets);
 const currentId = computed({
   get: () => store.currentWheelSetId,
-  set: (v: string | null) => store.setCurrentSet(v || ''),
+  set: (v) => store.setCurrentSet(v || ''),
 });
-const itemsForWheel = computed<WheelItem[]>(() => store.currentSet?.items ?? []);
+const itemsForWheel = computed(() => store.currentSet?.items ?? []);
 const isSpinning = computed(() => store.isSpinning);
 const lastResult = computed(() => store.lastResult);
 
@@ -159,7 +171,7 @@ function spin() {
 }
 
 // 转盘结束处理
-function onSpinEnd(item: WheelItem | null) {
+function onSpinEnd(item) {
   store.setResult(item);
   store.setSpinning(false);
 

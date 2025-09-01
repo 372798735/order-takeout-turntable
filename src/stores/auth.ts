@@ -4,7 +4,7 @@ import { api } from '@/api/client';
 interface AuthState {
     accessToken: string | null;
     refreshToken: string | null;
-    user: { id: string; email: string } | null;
+    user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } | null;
 }
 
 const AUTH_KEY = 'turntable-auth';
@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', {
         phoneToEmail(phone: string): string {
             return `${phone}@phone.local`;
         },
-        setAuth(data: { accessToken: string; refreshToken: string; user: { id: string; email: string } }) {
+        setAuth(data: { accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }) {
             this.accessToken = data.accessToken;
             this.refreshToken = data.refreshToken;
             this.user = data.user;
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async registerWithPhone(phone: string, password: string) {
             const email = this.phoneToEmail(phone);
-            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
+            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }>(
                 '/auth/register',
                 { email, password },
             );
@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async loginWithPhone(phone: string, password: string) {
             const email = this.phoneToEmail(phone);
-            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string } }>(
+            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }>(
                 '/auth/login',
                 { email, password },
             );
@@ -92,6 +92,13 @@ export const useAuthStore = defineStore('auth', {
             this.user = null;
             api.setToken(null);
             try { localStorage.removeItem(AUTH_KEY); } catch { }
+        },
+        async fetchMe() {
+            if (!this.accessToken) return;
+            api.setToken(this.accessToken);
+            const me = await api.get<{ id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string }>('/me');
+            this.user = me as any;
+            this.saveToStorage();
         },
     },
 });

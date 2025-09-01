@@ -22,6 +22,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Management',
     component: () => import('@/views/Management.vue'),
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/Profile.vue'),
+  },
 ];
 
 const router = createRouter({
