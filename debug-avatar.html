@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>头像调试页面</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .avatar-test {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin: 10px 0;
+      }
+      .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 2px solid #ddd;
+      }
+      .info {
+        flex: 1;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        background: #f8f9fa;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>用户头像调试页面</h1>
+
+    <div class="test-section">
+      <h3>测试 1: 检查本地存储的用户数据</h3>
+      <button onclick="checkLocalStorage()">检查本地存储</button>
+      <div id="storage-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>测试 2: 测试默认头像</h3>
+      <div class="avatar-test">
+        <div class="avatar" id="default-avatar"></div>
+        <div class="info">
+          <p>默认头像 URL:</p>
+          <p id="default-url"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>测试 3: 测试用户头像</h3>
+      <button onclick="testUserAvatar()">测试用户头像</button>
+      <div class="avatar-test">
+        <div class="avatar" id="user-avatar"></div>
+        <div class="info">
+          <p>用户头像 URL:</p>
+          <p id="user-url"></p>
+        </div>
+      </div>
+      <div id="avatar-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>测试 4: 获取最新用户信息</h3>
+      <button onclick="fetchUserInfo()">获取用户信息</button>
+      <div id="fetch-result" class="result"></div>
+    </div>
+
+    <script>
+      const API_BASE = 'http://47.113.179.233:5000/api/v1';
+      const defaultAvatarUrl =
+        'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
+
+      // 设置默认头像
+      document.getElementById('default-avatar').style.backgroundImage = `url(${defaultAvatarUrl})`;
+      document.getElementById('default-url').textContent = defaultAvatarUrl;
+
+      function checkLocalStorage() {
+        try {
+          const authData = localStorage.getItem('turntable-auth');
+          if (authData) {
+            const parsed = JSON.parse(authData);
+            document.getElementById('storage-result').textContent =
+              `本地存储数据:\n${JSON.stringify(parsed, null, 2)}`;
+          } else {
+            document.getElementById('storage-result').textContent = '本地存储中没有找到认证数据';
+          }
+        } catch (error) {
+          document.getElementById('storage-result').textContent = `错误: ${error.message}`;
+        }
+      }
+
+      function testUserAvatar() {
+        try {
+          const authData = localStorage.getItem('turntable-auth');
+          if (authData) {
+            const parsed = JSON.parse(authData);
+            const userAvatar = parsed.user?.avatar;
+            const avatarUrl = userAvatar || defaultAvatarUrl;
+
+            document.getElementById('user-avatar').style.backgroundImage = `url(${avatarUrl})`;
+            document.getElementById('user-url').textContent = avatarUrl;
+            document.getElementById('avatar-result').textContent =
+              `用户头像: ${userAvatar || '(使用默认头像)'}\n最终URL: ${avatarUrl}`;
+          } else {
+            document.getElementById('avatar-result').textContent = '没有找到用户数据';
+          }
+        } catch (error) {
+          document.getElementById('avatar-result').textContent = `错误: ${error.message}`;
+        }
+      }
+
+      async function fetchUserInfo() {
+        try {
+          const authData = localStorage.getItem('turntable-auth');
+          if (!authData) {
+            document.getElementById('fetch-result').textContent = '没有认证信息，无法获取用户数据';
+            return;
+          }
+
+          const parsed = JSON.parse(authData);
+          const token = parsed.accessToken;
+
+          if (!token) {
+            document.getElementById('fetch-result').textContent = '没有访问令牌';
+            return;
+          }
+
+          const response = await fetch(`${API_BASE}/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            document.getElementById('fetch-result').textContent =
+              `服务器返回的用户数据:\n${JSON.stringify(userData, null, 2)}`;
+          } else {
+            document.getElementById('fetch-result').textContent =
+              `请求失败: ${response.status} ${response.statusText}`;
+          }
+        } catch (error) {
+          document.getElementById('fetch-result').textContent = `错误: ${error.message}`;
+        }
+      }
+
+      // 页面加载时自动检查
+      window.onload = function () {
+        checkLocalStorage();
+        testUserAvatar();
+      };
+    </script>
+  </body>
+</html>

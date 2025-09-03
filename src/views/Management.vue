@@ -62,6 +62,22 @@
         </div>
 
         <el-divider />
+
+        <!-- 用户信息和操作 -->
+        <div v-if="auth.user" class="user-section">
+          <div class="user-info">
+            <el-avatar :size="32" :src="auth.user?.avatar || defaultAvatar" />
+            <span class="user-name">{{ auth.user?.nickname || '用户' }}</span>
+          </div>
+          <div class="user-actions">
+            <el-button text type="primary" @click="$router.push('/profile')" size="small">
+              个人资料
+            </el-button>
+            <el-button text type="danger" @click="handleLogout" size="small"> 退出登录 </el-button>
+          </div>
+        </div>
+
+        <el-divider />
         <el-button text type="primary" @click="$router.push('/')" class="back-btn">
           返回首页
         </el-button>
@@ -92,13 +108,24 @@
         </el-form>
 
         <div class="add-item">
-          <el-input
-            v-model.trim="newItemName"
-            placeholder="新增选项(≤10)"
-            maxlength="10"
-            size="small"
-            class="new-item-input"
-          />
+          <div class="add-item-form">
+            <el-input
+              v-model.trim="newItemName"
+              placeholder="选项名称(≤12字)"
+              maxlength="12"
+              size="small"
+              class="new-item-input"
+              show-word-limit
+            />
+            <el-input
+              v-model.trim="newItemDescription"
+              placeholder="备注信息(可选)"
+              size="small"
+              class="new-item-description"
+              type="textarea"
+              :rows="2"
+            />
+          </div>
           <el-button
             type="primary"
             size="small"
@@ -120,7 +147,24 @@
             @drop="onDrop(idx)"
             class="item-row"
           >
-            <el-input v-model.trim="it.name" maxlength="10" size="small" class="item-input" />
+            <div class="item-content">
+              <el-input
+                v-model.trim="it.name"
+                maxlength="12"
+                size="small"
+                class="item-input"
+                placeholder="选项名称"
+                show-word-limit
+              />
+              <el-input
+                v-model.trim="it.description"
+                size="small"
+                class="item-description"
+                placeholder="备注信息(可选)"
+                type="textarea"
+                :rows="1"
+              />
+            </div>
             <div class="row-actions">
               <el-button size="small" :disabled="idx === 0" @click="move(idx, -1)" class="move-btn">
                 上移
@@ -171,9 +215,17 @@
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useWheelStore, type WheelItem } from '@/stores/wheel';
 import WheelCanvas from '@/components/wheel/WheelCanvas.vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const store = useWheelStore();
+const auth = useAuthStore();
+const router = useRouter();
+
+// 默认头像
+const defaultAvatar =
+  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
 
 // 响应式检测
 const isMobile = ref(false);
@@ -185,6 +237,7 @@ function checkMobile() {
 onMounted(() => {
   // 确保刷新或直达管理页时能从本地存储加载数据
   store.load();
+  auth.fetchMe().catch(() => {});
   checkMobile();
   window.addEventListener('resize', checkMobile);
 });
@@ -192,6 +245,27 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile);
 });
+
+// 处理登出
+async function handleLogout() {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '确认退出', {
+      confirmButtonText: '确定退出',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger',
+    });
+
+    await auth.logout();
+    ElMessage.success('已退出登录');
+    await router.push('/login');
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Logout error:', error);
+      ElMessage.error('退出登录失败，请重试');
+    }
+  }
+}
 
 const wheelSets = computed(() => store.wheelSets);
 const activeId = computed({
@@ -202,6 +276,7 @@ const activeId = computed({
 });
 const newSetName = ref('');
 const newItemName = ref('');
+const newItemDescription = ref('');
 
 type Buffer = { id: string; name: string; items: WheelItem[] };
 const buffer = ref<Buffer | null>(null);
@@ -234,10 +309,20 @@ function addItem() {
   if (!buffer.value) return;
   if (buffer.value.items.length >= 15) return ElMessage.warning('最多 15 个选项');
   const name = newItemName.value.trim();
-  if (!name) return;
+  if (!name) return ElMessage.warning('请输入选项名称');
+  if (name.length > 12) return ElMessage.warning('选项名称不能超过12个字');
+
   const id = `${Date.now()}`;
-  buffer.value.items.push({ id, name: name.slice(0, 10) });
+  const description = newItemDescription.value.trim();
+
+  buffer.value.items.push({
+    id,
+    name,
+    description: description || undefined,
+  });
+
   newItemName.value = '';
+  newItemDescription.value = '';
 }
 
 function removeItem(idx: number) {
@@ -276,7 +361,11 @@ function save() {
   if (!buffer.value) return;
   const name = buffer.value.name.trim().slice(0, 20) || '未命名';
   const items = buffer.value.items
-    .map((i: WheelItem) => ({ ...i, name: (i.name || '').trim().slice(0, 10) }))
+    .map((i: WheelItem) => ({
+      ...i,
+      name: (i.name || '').trim().slice(0, 12), // 修改为12个字符限制
+      description: (i.description || '').trim() || undefined,
+    }))
     .filter((i: WheelItem) => i.name);
   store.updateSet(buffer.value.id, { name, items });
   buffer.value = snapshotFromStore();
@@ -367,6 +456,35 @@ watch(
   width: 100%;
 }
 
+/* 用户信息样式 */
+.user-section {
+  margin: 8px 0;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.user-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-actions .el-button {
+  justify-content: flex-start;
+  padding: 4px 0;
+}
+
 /* 主内容区域 */
 .main {
   padding: 8px;
@@ -410,8 +528,17 @@ watch(
 .add-item {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
   margin-bottom: 16px;
   flex-wrap: wrap;
+}
+
+.add-item-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
 }
 
 .new-item-input {
@@ -449,7 +576,19 @@ watch(
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-right: 8px;
+}
+
 .item-input {
+  width: 100%;
+}
+
+.item-description {
   width: 100%;
 }
 

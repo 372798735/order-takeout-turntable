@@ -1,6 +1,6 @@
 <template>
   <div class="wheel-wrap">
-    <canvas ref="canvasRef" :width="size" :height="size" />
+    <canvas ref="canvasRef" :width="size" :height="size" @click="handleCanvasClick" />
     <canvas ref="particleCanvasRef" :width="size" :height="size" class="particle-canvas" />
     <div class="pointer glow" :class="{ 'pointer-active': spinning }"></div>
     <div class="hub" :class="{ breathing: spinning }"></div>
@@ -49,7 +49,10 @@ interface WheelItem {
 }
 
 const props = defineProps<{ items: WheelItem[]; size?: number }>();
-const emit = defineEmits<{ (e: 'end', item: WheelItem | null): void }>();
+const emit = defineEmits<{
+  (e: 'end', item: WheelItem | null): void;
+  (e: 'itemClick', item: WheelItem): void;
+}>();
 
 const size = props.size ?? 520;
 const radius = size / 2;
@@ -408,6 +411,52 @@ function spin() {
     }
   }
   requestAnimationFrame(animate);
+}
+
+// 处理画布点击事件
+function handleCanvasClick(event: MouseEvent) {
+  if (spinningRef.value) return; // 转盘旋转中不响应点击
+
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  // 转换为画布坐标
+  const canvasX = (x / rect.width) * size;
+  const canvasY = (y / rect.height) * size;
+
+  // 计算相对于圆心的位置
+  const centerX = size / 2;
+  const centerY = size / 2;
+  const dx = canvasX - centerX;
+  const dy = canvasY - centerY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // 检查是否点击在转盘范围内（不包括中心圆）
+  const hubRadius = 30;
+  if (distance < hubRadius || distance > radius - 10) return;
+
+  // 计算点击的角度
+  let angle = Math.atan2(dy, dx);
+  if (angle < 0) angle += 2 * Math.PI;
+
+  // 考虑当前旋转角度
+  angle = (angle - (currentRotation * Math.PI) / 180 + 2 * Math.PI) % (2 * Math.PI);
+
+  // 计算点击的扇形索引
+  const items = props.items;
+  if (items.length === 0) return;
+
+  const sectorAngle = (2 * Math.PI) / items.length;
+  const clickedIndex = Math.floor(angle / sectorAngle);
+  const item = items[clickedIndex];
+
+  if (item) {
+    emit('itemClick', item);
+  }
 }
 
 defineExpose({ spin });

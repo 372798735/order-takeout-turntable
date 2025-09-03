@@ -5,7 +5,8 @@
   --color-on-surface: #1c1b1f;
 }
 
-html, body {
+html,
+body {
   background: var(--color-surface);
   color: var(--color-on-surface);
 }
@@ -13,4 +14,4 @@ html, body {
 body {
   font-size: 15px;
   line-height: 1.6;
-} 
+}

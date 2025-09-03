@@ -17,5 +17,5 @@ app.use(ElementPlus, { locale: zhCn });
 const auth = useAuthStore();
 auth.loadFromStorage();
 auth.ensureAuth().finally(() => {
-    app.mount('#app');
+  app.mount('#app');
 });

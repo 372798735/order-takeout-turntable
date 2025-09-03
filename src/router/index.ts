@@ -27,6 +27,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Profile',
     component: () => import('@/views/Profile.vue'),
   },
+  {
+    path: '/item/:setId/:itemId',
+    name: 'ItemDetail',
+    component: () => import('@/views/ItemDetail.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -54,4 +59,4 @@ router.beforeEach((to) => {
   return true;
 });
 
-export default router; 
+export default router;

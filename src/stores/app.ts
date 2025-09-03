@@ -13,4 +13,4 @@ export const useAppStore = defineStore('app', {
       this.theme = t;
     },
   },
-}); 
+});

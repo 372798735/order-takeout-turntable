@@ -2,23 +2,14 @@
   <el-config-provider>
     <el-container class="page">
       <!-- 响应式头部 -->
-      <el-header height="56px" class="bar">
-        <div class="brand">
-          <el-icon><MagicStick /></el-icon>
-          <span class="title">幸运大转盘</span>
-        </div>
-        <div class="actions">
-          <el-button type="primary" text @click="$router.push('/manage')" class="manage-btn">
-            管理转盘
-          </el-button>
-          <el-avatar
-            v-if="auth.user"
-            :size="36"
-            :src="auth.user?.avatar || defaultAvatar"
-            class="avatar"
-            @click="$router.push('/profile')"
-          />
-        </div>
+      <el-header height="56px">
+        <AppHeader>
+          <template #actions>
+            <el-button type="primary" text @click="$router.push('/manage')" class="manage-btn">
+              管理转盘
+            </el-button>
+          </template>
+        </AppHeader>
       </el-header>
 
       <el-main class="main">
@@ -67,6 +58,7 @@
                     class="wheel"
                     :items="itemsForWheel"
                     @end="onSpinEnd"
+                    @itemClick="onItemClick"
                   />
                 </div>
               </transition>
@@ -116,14 +108,15 @@ import { computed, onMounted, ref } from 'vue';
 import { useWheelStore } from '@/stores/wheel';
 import WheelCanvas from '@/components/wheel/WheelCanvas.vue';
 import { ElMessage } from 'element-plus';
-import { MagicStick, Refresh, SuccessFilled } from '@element-plus/icons-vue';
+import { Refresh, SuccessFilled } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import AppHeader from '@/components/common/AppHeader.vue';
 
 const store = useWheelStore();
 const wheelRef = ref(null);
 const auth = useAuthStore();
-const defaultAvatar =
-  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
+const router = useRouter();
 
 onMounted(() => {
   store.load();
@@ -190,38 +183,19 @@ function onSpinEnd(item) {
     }, 3000);
   }
 }
+
+// 处理转盘项目点击
+function onItemClick(item) {
+  const currentSetId = store.currentWheelSetId;
+  if (currentSetId && item.id) {
+    router.push(`/item/${currentSetId}/${item.id}`);
+  }
+}
 </script>
 
 <style scoped>
 .page {
   min-height: 100vh;
-}
-
-/* 响应式头部 */
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.title {
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .manage-btn {

@@ -4,9 +4,7 @@ import { WheelService } from './wheel.service';
 import { WheelImportController } from './wheel.import.controller';
 
 @Module({
-    controllers: [WheelController, WheelImportController],
-    providers: [WheelService],
+  controllers: [WheelController, WheelImportController],
+  providers: [WheelService],
 })
-export class WheelModule { }
-
-
+export class WheelModule {}

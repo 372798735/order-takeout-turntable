@@ -41,18 +41,39 @@
           </div>
         </el-form>
       </el-card>
+
+      <!-- 登出卡片 -->
+      <el-card shadow="hover" class="card logout-card">
+        <template #header>
+          <div class="card-header small">
+            <span>账户操作</span>
+          </div>
+        </template>
+
+        <div class="logout-section">
+          <p class="logout-desc">退出登录后，您需要重新输入用户名和密码才能使用应用。</p>
+          <div class="logout-actions">
+            <el-button type="danger" :loading="loggingOut" @click="handleLogout" class="logout-btn">
+              <el-icon><SwitchButton /></el-icon>
+              退出登录
+            </el-button>
+          </div>
+        </div>
+      </el-card>
     </el-main>
   </el-container>
 </template>
 
 <script setup>
 import { reactive, onMounted, ref } from 'vue';
-import { User } from '@element-plus/icons-vue';
+import { User, SwitchButton } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api/client';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useRouter } from 'vue-router';
 
 const auth = useAuthStore();
+const router = useRouter();
 const defaultAvatar =
   'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
 
@@ -62,6 +83,7 @@ const form = reactive({
   gender: 'UNKNOWN',
 });
 const saving = ref(false);
+const loggingOut = ref(false);
 
 function load() {
   const u = auth.user || {};
@@ -95,6 +117,34 @@ async function save() {
 
 function reset() {
   load();
+}
+
+async function handleLogout() {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？退出后需要重新登录才能使用应用。', '确认退出', {
+      confirmButtonText: '确定退出',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger',
+    });
+
+    loggingOut.value = true;
+
+    // 调用登出方法
+    await auth.logout();
+
+    ElMessage.success('已退出登录');
+
+    // 跳转到登录页面
+    await router.push('/login');
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Logout error:', error);
+      ElMessage.error('退出登录失败，请重试');
+    }
+  } finally {
+    loggingOut.value = false;
+  }
 }
 </script>
 
@@ -135,17 +185,47 @@ function reset() {
   gap: 12px;
   width: 100%;
 }
+
 .actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
+/* 登出卡片样式 */
+.logout-card {
+  max-width: 640px;
+  margin: 16px auto 0;
+}
+
+.logout-section {
+  padding: 8px 0;
+}
+
+.logout-desc {
+  color: #666;
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.logout-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.logout-btn {
+  min-width: 120px;
+}
+
 @media (max-width: 768px) {
   .main {
     padding: 12px;
   }
   .card {
     margin: 0 8px;
+  }
+  .logout-card {
+    margin: 16px 8px 0;
   }
 }
 </style>

@@ -5,8 +5,6 @@ import { WheelModule } from './wheel/wheel.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, UsersModule, WheelModule],
+  imports: [PrismaModule, AuthModule, UsersModule, WheelModule],
 })
-export class AppModule { }
-
-
+export class AppModule {}

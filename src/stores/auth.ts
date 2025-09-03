@@ -2,105 +2,164 @@ import { defineStore } from 'pinia';
 import { api } from '@/api/client';
 
 interface AuthState {
-    accessToken: string | null;
-    refreshToken: string | null;
-    user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: {
+    id: string;
+    email: string;
+    phone?: string | null;
+    nickname?: string | null;
+    avatar?: string;
+    gender?: string;
+  } | null;
 }
 
 const AUTH_KEY = 'turntable-auth';
 const DEVICE_KEY = 'turntable-device-id';
 
 function getOrCreateDeviceId(): string {
-    try {
-        let id = localStorage.getItem(DEVICE_KEY);
-        if (!id) {
-            id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-            localStorage.setItem(DEVICE_KEY, id);
-        }
-        return id;
-    } catch {
-        return `${Date.now()}`;
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(DEVICE_KEY, id);
     }
+    return id;
+  } catch {
+    return `${Date.now()}`;
+  }
 }
 
 export const useAuthStore = defineStore('auth', {
-    state: (): AuthState => ({
-        accessToken: null,
-        refreshToken: null,
-        user: null,
-    }),
-    actions: {
-        phoneToEmail(phone: string): string {
-            return `${phone}@phone.local`;
-        },
-        setAuth(data: { accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }) {
-            this.accessToken = data.accessToken;
-            this.refreshToken = data.refreshToken;
-            this.user = data.user;
-            api.setToken(this.accessToken);
-            this.saveToStorage();
-        },
-        async registerWithPhone(phone: string, password: string) {
-            const email = this.phoneToEmail(phone);
-            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }>(
-                '/auth/register',
-                { email, password },
-            );
-            this.setAuth(res);
-        },
-        async loginWithPhone(phone: string, password: string) {
-            const email = this.phoneToEmail(phone);
-            const res = await api.post<{ accessToken: string; refreshToken: string; user: { id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string } }>(
-                '/auth/login',
-                { email, password },
-            );
-            this.setAuth(res);
-        },
-        loadFromStorage() {
-            try {
-                const raw = localStorage.getItem(AUTH_KEY);
-                if (raw) {
-                    const data: AuthState = JSON.parse(raw);
-                    this.accessToken = data.accessToken;
-                    this.refreshToken = data.refreshToken;
-                    this.user = data.user;
-                    api.setToken(this.accessToken);
-                }
-            } catch { }
-        },
-        saveToStorage() {
-            try {
-                localStorage.setItem(
-                    AUTH_KEY,
-                    JSON.stringify({ accessToken: this.accessToken, refreshToken: this.refreshToken, user: this.user }),
-                );
-            } catch { }
-        },
-        async ensureAuth() {
-            if (!this.accessToken) this.loadFromStorage();
-            if (!this.accessToken) return;
-            api.setToken(this.accessToken);
-            try {
-                await api.get('/wheel-sets');
-            } catch {
-                this.logout();
-            }
-        },
-        logout() {
-            this.accessToken = null;
-            this.refreshToken = null;
-            this.user = null;
-            api.setToken(null);
-            try { localStorage.removeItem(AUTH_KEY); } catch { }
-        },
-        async fetchMe() {
-            if (!this.accessToken) return;
-            api.setToken(this.accessToken);
-            const me = await api.get<{ id: string; email: string; phone?: string | null; nickname?: string | null; avatar?: string; gender?: string }>('/me');
-            this.user = me as any;
-            this.saveToStorage();
-        },
+  state: (): AuthState => ({
+    accessToken: null,
+    refreshToken: null,
+    user: null,
+  }),
+  actions: {
+    phoneToEmail(phone: string): string {
+      return `${phone}@phone.local`;
     },
+    setAuth(data: {
+      accessToken: string;
+      refreshToken: string;
+      user: {
+        id: string;
+        email: string;
+        phone?: string | null;
+        nickname?: string | null;
+        avatar?: string;
+        gender?: string;
+      };
+    }) {
+      this.accessToken = data.accessToken;
+      this.refreshToken = data.refreshToken;
+      this.user = data.user;
+      api.setToken(this.accessToken);
+      this.saveToStorage();
+    },
+    async registerWithPhone(phone: string, password: string) {
+      const email = this.phoneToEmail(phone);
+      const res = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        user: {
+          id: string;
+          email: string;
+          phone?: string | null;
+          nickname?: string | null;
+          avatar?: string;
+          gender?: string;
+        };
+      }>('/auth/register', { email, password });
+      this.setAuth(res);
+    },
+    async loginWithPhone(phone: string, password: string) {
+      const email = this.phoneToEmail(phone);
+      const res = await api.post<{
+        accessToken: string;
+        refreshToken: string;
+        user: {
+          id: string;
+          email: string;
+          phone?: string | null;
+          nickname?: string | null;
+          avatar?: string;
+          gender?: string;
+        };
+      }>('/auth/login', { email, password });
+      this.setAuth(res);
+    },
+    loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(AUTH_KEY);
+        if (raw) {
+          const data: AuthState = JSON.parse(raw);
+          this.accessToken = data.accessToken;
+          this.refreshToken = data.refreshToken;
+          this.user = data.user;
+          api.setToken(this.accessToken);
+        }
+      } catch {}
+    },
+    saveToStorage() {
+      try {
+        localStorage.setItem(
+          AUTH_KEY,
+          JSON.stringify({
+            accessToken: this.accessToken,
+            refreshToken: this.refreshToken,
+            user: this.user,
+          }),
+        );
+      } catch {}
+    },
+    async ensureAuth() {
+      if (!this.accessToken) this.loadFromStorage();
+      if (!this.accessToken) return;
+      api.setToken(this.accessToken);
+      try {
+        await api.get('/wheel-sets');
+      } catch {
+        this.logout();
+      }
+    },
+    async logout() {
+      // 如果有 token，先调用后端登出接口
+      if (this.accessToken) {
+        try {
+          api.setToken(this.accessToken);
+          await api.post('/auth/logout');
+        } catch (error) {
+          console.warn('Backend logout failed:', error);
+          // 即使后端登出失败，也要清除本地数据
+        }
+      }
+
+      // 清除本地状态
+      this.accessToken = null;
+      this.refreshToken = null;
+      this.user = null;
+      api.setToken(null);
+
+      // 清除本地存储
+      try {
+        localStorage.removeItem(AUTH_KEY);
+      } catch {}
+    },
+    async fetchMe() {
+      if (!this.accessToken) return;
+      api.setToken(this.accessToken);
+      const me = await api.get<{
+        id: string;
+        email: string;
+        phone?: string | null;
+        nickname?: string | null;
+        avatar?: string;
+        gender?: string;
+      }>('/me');
+      this.user = me as any;
+      this.saveToStorage();
+    },
+  },
 });
-
-
