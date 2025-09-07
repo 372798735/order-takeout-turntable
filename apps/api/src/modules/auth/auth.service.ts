@@ -25,10 +25,13 @@ export class AuthService {
       phone,
       nickname: randomNick,
     });
-    const accessToken = await this.jwt.signAsync({ sub: user.id, email: user.email });
-    const refreshToken = await this.jwt.signAsync(
+    const accessToken = await this.jwt.signAsync(
       { sub: user.id, email: user.email },
       { expiresIn: '7d' },
+    );
+    const refreshToken = await this.jwt.signAsync(
+      { sub: user.id, email: user.email },
+      { expiresIn: '30d' },
     );
     return {
       accessToken,
@@ -52,10 +55,13 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
-    const accessToken = await this.jwt.signAsync({ sub: user.id, email: user.email });
-    const refreshToken = await this.jwt.signAsync(
+    const accessToken = await this.jwt.signAsync(
       { sub: user.id, email: user.email },
       { expiresIn: '7d' },
+    );
+    const refreshToken = await this.jwt.signAsync(
+      { sub: user.id, email: user.email },
+      { expiresIn: '30d' },
     );
     return {
       accessToken,
@@ -73,7 +79,10 @@ export class AuthService {
   async refresh(token: string) {
     try {
       const payload = await this.jwt.verifyAsync(token);
-      const accessToken = await this.jwt.signAsync({ sub: payload.sub, email: payload.email });
+      const accessToken = await this.jwt.signAsync(
+        { sub: payload.sub, email: payload.email },
+        { expiresIn: '7d' },
+      );
       return { accessToken };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');

@@ -5,7 +5,7 @@
       <el-header height="56px">
         <AppHeader>
           <template #actions>
-            <el-button type="primary" text @click="$router.push('/manage')" class="manage-btn">
+            <el-button type="primary" text class="manage-btn" @click="$router.push('/manage')">
               管理转盘
             </el-button>
           </template>
@@ -40,9 +40,9 @@
                     </div>
                     <el-button
                       type="primary"
+                      class="spin-btn"
                       :disabled="isSpinning || itemsForWheel.length === 0"
                       @click="spin"
-                      class="spin-btn"
                     >
                       <el-icon class="mr"><Refresh /></el-icon>
                       <span class="btn-text">开始转动</span>
@@ -58,7 +58,7 @@
                     class="wheel"
                     :items="itemsForWheel"
                     @end="onSpinEnd"
-                    @itemClick="onItemClick"
+                    @item-click="onItemClick"
                   />
                 </div>
               </transition>
@@ -93,7 +93,8 @@
               </el-descriptions>
               <el-divider />
               <el-alert title="小提示" type="info" show-icon :closable="false">
-                使用管理页可添加/排序选项，建议保持 6~12 个扇区获得更佳视觉与节奏。
+                <p>使用管理页可添加/排序选项，建议保持 6~12 个扇区获得更佳视觉与节奏。</p>
+                <p>💡 点击转盘上的任意选项可查看详情信息！</p>
               </el-alert>
             </el-card>
           </el-col>
@@ -266,9 +267,10 @@ function onItemClick(item) {
 }
 
 .wheel-wrap {
-  display: grid;
-  place-items: center;
-  padding: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
   min-height: 300px;
 }
 
@@ -348,7 +350,14 @@ function onItemClick(item) {
   }
 
   .wheel-wrap {
-    min-height: 250px;
+    min-height: 320px;
+    padding: 16px;
+  }
+
+  .wheel {
+    max-width: 95%;
+    width: 320px;
+    height: 320px;
   }
 
   .result {
@@ -380,7 +389,14 @@ function onItemClick(item) {
   }
 
   .wheel-wrap {
-    min-height: 200px;
+    min-height: 300px;
+    padding: 20px 16px;
+  }
+
+  .wheel {
+    max-width: 90%;
+    width: 300px;
+    height: 300px;
   }
 }
 
@@ -401,7 +417,14 @@ function onItemClick(item) {
   }
 
   .wheel-wrap {
-    min-height: 400px;
+    min-height: 440px;
+    padding: 20px;
+  }
+
+  .wheel {
+    max-width: 100%;
+    width: 420px;
+    height: 420px;
   }
 }
 
@@ -411,7 +434,14 @@ function onItemClick(item) {
   }
 
   .wheel-wrap {
-    min-height: 450px;
+    min-height: 500px;
+    padding: 24px;
+  }
+
+  .wheel {
+    max-width: 100%;
+    width: 480px;
+    height: 480px;
   }
 }
 

@@ -10,7 +10,14 @@
 
       <!-- 用户头像下拉菜单 -->
       <el-dropdown v-if="auth.user" trigger="click" @command="handleUserCommand">
-        <el-avatar :size="36" :src="auth.user?.avatar || defaultAvatar" class="avatar clickable" />
+        <div class="avatar clickable">
+          <img
+            :src="currentAvatarSrc"
+            :alt="auth.user?.nickname || '用户头像'"
+            class="avatar-img"
+            @error="handleImageError"
+          />
+        </div>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile">
@@ -29,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import { MagicStick, User, SwitchButton } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '@/stores/auth';
@@ -37,11 +45,36 @@ import { useRouter } from 'vue-router';
 const auth = useAuthStore();
 const router = useRouter();
 
-const defaultAvatar =
-  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
+const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png';
+const imageError = ref(false);
+
+// 计算头像源，确保总是有有效的图片URL
+const avatarSrc = computed(() => {
+  const userAvatar = auth.user?.avatar;
+  if (userAvatar && userAvatar.trim() !== '') {
+    return userAvatar;
+  }
+  return defaultAvatar;
+});
+
+// 当前显示的头像源（考虑错误状态）
+const currentAvatarSrc = computed(() => {
+  if (imageError.value) {
+    return defaultAvatar;
+  }
+  return avatarSrc.value;
+});
 
 function goHome() {
   router.push('/');
+}
+
+function handleImageError(event: Event) {
+  imageError.value = true;
+  // 重置错误状态，以便用户头像更新后能重新尝试加载
+  setTimeout(() => {
+    imageError.value = false;
+  }, 1000);
 }
 
 // 处理用户下拉菜单命令
@@ -108,9 +141,22 @@ async function handleUserCommand(command: string) {
 .avatar.clickable {
   cursor: pointer;
   transition: transform 0.2s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #e4e7ed;
 }
 
 .avatar.clickable:hover {
   transform: scale(1.05);
+  border-color: #409eff;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>

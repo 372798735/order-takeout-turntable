@@ -4,8 +4,10 @@ import { api } from '@/api/client';
 export interface WheelItem {
   id: string;
   name: string;
-  description?: string; // 备注字段
+  description?: string; // 备注信息
   color?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface WheelSet {
@@ -140,46 +142,25 @@ export const useWheelStore = defineStore('wheel', {
     async updateSet(setId: string, payload: { name?: string; items?: WheelItem[] }) {
       const s = this.wheelSets.find((x) => x.id === setId);
       if (!s) return;
-      // 更新名称
-      if (typeof payload.name === 'string') {
-        await api.patch(`/wheel-sets/${setId}`, { name: payload.name });
-      }
-      // 对 items 做同步：
-      if (Array.isArray(payload.items)) {
-        // 先对现有项做增删改，再统一排序
-        const current = await api.get<WheelSet>(`/wheel-sets/${setId}`);
-        const existingIds = new Set(current.items.map((i) => i.id));
-        const payloadIds = new Set(payload.items.map((i) => i.id));
 
-        // 删除不存在的
-        for (const it of current.items) {
-          if (!payloadIds.has(it.id)) {
-            await api.delete(`/wheel-sets/${setId}/items/${it.id}`);
-          }
-        }
-        // 新增不存在的
-        for (const [idx, it] of payload.items.entries()) {
-          if (!existingIds.has(it.id)) {
-            await api.post(`/wheel-sets/${setId}/items`, {
-              name: it.name,
-              description: it.description,
-              order: idx,
-            });
-          } else {
-            await api.patch(`/wheel-sets/${setId}/items/${it.id}`, {
-              name: it.name,
-              description: it.description,
-            });
-          }
-        }
-        // 统一排序
-        await api.post(`/wheel-sets/${setId}/items:reorder`, {
-          items: payload.items.map((it, idx) => ({ id: it.id, order: idx })),
-        });
+      // 使用批量更新API
+      const batchData: any = {};
+      if (typeof payload.name === 'string') {
+        batchData.name = payload.name;
       }
-      const detail = await api.get<WheelSet>(`/wheel-sets/${setId}`);
+      if (Array.isArray(payload.items)) {
+        batchData.items = payload.items.map((item, idx) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          color: item.color,
+          order: idx,
+        }));
+      }
+
+      const updatedSet = await api.put<WheelSet>(`/wheel-sets/${setId}/batch`, batchData);
       const idx = this.wheelSets.findIndex((x) => x.id === setId);
-      if (idx >= 0) this.wheelSets[idx] = detail;
+      if (idx >= 0) this.wheelSets[idx] = updatedSet;
       this.save();
     },
     async updateItemName(setId: string, itemId: string, name: string) {

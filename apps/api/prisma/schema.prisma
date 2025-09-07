@@ -3,14 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-enum Gender {
-  UNKNOWN
-  MALE
-  FEMALE
 }
 
 model User {
@@ -20,7 +14,7 @@ model User {
   password  String
   nickname  String?
   avatar    String    @default("https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp")
-  gender    Gender    @default(UNKNOWN)
+  gender    String    @default("UNKNOWN") // UNKNOWN, MALE, FEMALE
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   wheelSets WheelSet[]

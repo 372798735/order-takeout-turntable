@@ -1,213 +1,213 @@
 <template>
-  <el-container class="page" :class="{ 'mobile-column': isMobile }">
-    <!-- 响应式侧边栏 - 移动端变为顶部，PC端保持左侧 -->
-    <el-aside
-      :width="isMobile ? '100%' : '320px'"
-      class="side"
-      :class="{ 'mobile-side': isMobile }"
-    >
-      <el-card shadow="hover" class="side-card">
-        <template #header>
-          <div class="card-header small">
-            <span>套餐列表</span>
-            <el-button type="primary" text size="small" @click="addSet" class="add-btn">
-              新建
-            </el-button>
-          </div>
+  <el-container class="page" direction="vertical">
+    <!-- 统一头部 -->
+    <el-header height="56px">
+      <AppHeader>
+        <template #actions>
+          <el-button type="primary" text class="home-btn" @click="$router.push('/')">
+            回到首页
+          </el-button>
         </template>
+      </AppHeader>
+    </el-header>
 
-        <!-- 移动端显示套餐选择器，PC端显示菜单列表 -->
-        <div v-if="isMobile" class="mobile-set-selector">
-          <el-select
-            v-model="activeId"
-            placeholder="选择套餐"
-            size="large"
-            class="mobile-set-dropdown"
-            @change="selectSet"
-          >
-            <el-option v-for="s in wheelSets" :key="s.id" :label="s.name" :value="s.id" />
-          </el-select>
-          <el-alert
-            v-if="!buffer"
-            class="mt8"
-            title="请选择套餐或创建新套餐后即可在下方编辑"
-            type="info"
-            show-icon
-            :closable="false"
-          />
-        </div>
-
-        <el-scrollbar v-else max-height="50vh" class="set-scrollbar">
-          <el-menu :default-active="activeId || ''" class="set-menu" @select="selectSet">
-            <el-menu-item v-for="s in wheelSets" :key="s.id" :index="s.id">
-              <span class="name">{{ s.name }}</span>
-              <el-button link type="danger" @click.stop="removeSet(s.id)" class="delete-btn">
-                删除
+    <!-- 主内容区域：侧边栏+主要内容 -->
+    <el-container class="content-container" :class="{ 'mobile-column': isMobile }">
+      <!-- 响应式侧边栏 - 移动端变为顶部，PC端保持左侧 -->
+      <el-aside
+        :width="isMobile ? '100%' : '280px'"
+        class="side"
+        :class="{ 'mobile-side': isMobile }"
+      >
+        <el-card shadow="hover" class="side-card">
+          <template #header>
+            <div class="card-header small">
+              <span>套餐列表</span>
+              <el-button type="primary" text size="small" class="add-btn" @click="addSet">
+                新建
               </el-button>
-            </el-menu-item>
-          </el-menu>
-        </el-scrollbar>
+            </div>
+          </template>
 
-        <div class="add">
-          <el-input
-            v-model.trim="newSetName"
-            placeholder="新建套餐名称(≤20)"
-            size="small"
-            maxlength="20"
-            class="new-set-input"
-          />
-          <el-button class="mt8 new-set-btn" type="primary" size="small" @click="addSet">
-            新建套餐
-          </el-button>
-        </div>
-
-        <el-divider />
-
-        <!-- 用户信息和操作 -->
-        <div v-if="auth.user" class="user-section">
-          <div class="user-info">
-            <el-avatar :size="32" :src="auth.user?.avatar || defaultAvatar" />
-            <span class="user-name">{{ auth.user?.nickname || '用户' }}</span>
+          <!-- 移动端显示套餐选择器，PC端显示菜单列表 -->
+          <div v-if="isMobile" class="mobile-set-selector">
+            <el-select
+              v-model="activeId"
+              placeholder="选择套餐"
+              size="large"
+              class="mobile-set-dropdown"
+              @change="selectSet"
+            >
+              <el-option v-for="s in wheelSets" :key="s.id" :label="s.name" :value="s.id" />
+            </el-select>
+            <el-alert
+              v-if="!buffer"
+              class="mt8"
+              title="请选择套餐或创建新套餐后即可在下方编辑"
+              type="info"
+              show-icon
+              :closable="false"
+            />
           </div>
-          <div class="user-actions">
-            <el-button text type="primary" @click="$router.push('/profile')" size="small">
-              个人资料
-            </el-button>
-            <el-button text type="danger" @click="handleLogout" size="small"> 退出登录 </el-button>
-          </div>
-        </div>
 
-        <el-divider />
-        <el-button text type="primary" @click="$router.push('/')" class="back-btn">
-          返回首页
-        </el-button>
-      </el-card>
-    </el-aside>
+          <el-scrollbar v-else max-height="50vh" class="set-scrollbar">
+            <el-menu :default-active="activeId || ''" class="set-menu" @select="selectSet">
+              <el-menu-item v-for="s in wheelSets" :key="s.id" :index="s.id">
+                <span class="name">{{ s.name }}</span>
+                <el-button link type="danger" class="delete-btn" @click.stop="removeSet(s.id)">
+                  删除
+                </el-button>
+              </el-menu-item>
+            </el-menu>
+          </el-scrollbar>
 
-    <!-- 主内容区域 -->
-    <el-main v-if="buffer" class="main" :class="{ 'mobile-main': isMobile }">
-      <el-card shadow="hover" class="edit-card">
-        <template #header>
-          <div class="card-header small">
-            <span>编辑套餐</span>
-            <el-tag type="info" effect="plain" class="item-count">
-              {{ buffer.items.length }}/15
-            </el-tag>
-          </div>
-        </template>
-
-        <el-form label-width="80px" size="small" class="mb12">
-          <el-form-item label="名称">
+          <div class="add">
             <el-input
-              v-model.trim="buffer.name"
+              v-model.trim="newSetName"
+              placeholder="新建套餐名称(≤20)"
+              size="small"
               maxlength="20"
-              show-word-limit
-              class="name-input"
+              class="new-set-input"
             />
-          </el-form-item>
-        </el-form>
-
-        <div class="add-item">
-          <div class="add-item-form">
-            <el-input
-              v-model.trim="newItemName"
-              placeholder="选项名称(≤12字)"
-              maxlength="12"
-              size="small"
-              class="new-item-input"
-              show-word-limit
-            />
-            <el-input
-              v-model.trim="newItemDescription"
-              placeholder="备注信息(可选)"
-              size="small"
-              class="new-item-description"
-              type="textarea"
-              :rows="2"
-            />
+            <el-button class="mt8 new-set-btn" type="primary" size="small" @click="addSet">
+              新建套餐
+            </el-button>
           </div>
-          <el-button
-            type="primary"
-            size="small"
-            :disabled="buffer.items.length >= 15"
-            @click="addItem"
-            class="add-item-btn"
-          >
-            添加
-          </el-button>
-        </div>
 
-        <transition-group name="list" tag="ul" class="item-list">
-          <li
-            v-for="(it, idx) in buffer.items"
-            :key="it.id"
-            draggable="true"
-            @dragstart="onDragStart(idx, $event)"
-            @dragover.prevent
-            @drop="onDrop(idx)"
-            class="item-row"
-          >
-            <div class="item-content">
+          <el-divider />
+        </el-card>
+      </el-aside>
+
+      <!-- 主内容区域 -->
+      <el-main v-if="buffer" class="main" :class="{ 'mobile-main': isMobile }">
+        <el-card shadow="hover" class="edit-card">
+          <template #header>
+            <div class="card-header small">
+              <span>编辑套餐</span>
+              <el-tag type="info" effect="plain" class="item-count">
+                {{ buffer.items.length }}/15
+              </el-tag>
+            </div>
+          </template>
+
+          <el-form label-width="80px" size="small" class="mb12">
+            <el-form-item label="名称">
               <el-input
-                v-model.trim="it.name"
+                v-model.trim="buffer.name"
+                maxlength="20"
+                show-word-limit
+                class="name-input"
+              />
+            </el-form-item>
+          </el-form>
+
+          <div class="add-item">
+            <div class="add-item-form">
+              <el-input
+                v-model.trim="newItemName"
+                placeholder="选项名称(≤12字)"
                 maxlength="12"
                 size="small"
-                class="item-input"
-                placeholder="选项名称"
+                class="new-item-input"
                 show-word-limit
               />
               <el-input
-                v-model.trim="it.description"
+                v-model.trim="newItemDescription"
+                placeholder="备注信息(可选，≤50字)"
+                maxlength="50"
                 size="small"
-                class="item-description"
-                placeholder="备注信息(可选)"
-                type="textarea"
-                :rows="1"
+                class="new-item-description"
+                show-word-limit
               />
             </div>
-            <div class="row-actions">
-              <el-button size="small" :disabled="idx === 0" @click="move(idx, -1)" class="move-btn">
-                上移
-              </el-button>
-              <el-button
-                size="small"
-                :disabled="idx === buffer.items.length - 1"
-                @click="move(idx, 1)"
-                class="move-btn"
-              >
-                下移
-              </el-button>
-              <el-button size="small" type="danger" @click="removeItem(idx)" class="remove-btn">
-                删除
-              </el-button>
-            </div>
-          </li>
-        </transition-group>
-
-        <div class="actions">
-          <el-button @click="cancel" class="cancel-btn">取消</el-button>
-          <el-button type="primary" @click="save" class="save-btn">保存</el-button>
-        </div>
-      </el-card>
-
-      <el-card class="mt12 preview-card" shadow="hover">
-        <template #header>
-          <div class="card-header small">
-            <span>预览</span>
+            <el-button
+              type="primary"
+              size="small"
+              class="add-item-btn"
+              :disabled="buffer.items.length >= 15"
+              @click="addItem"
+            >
+              添加
+            </el-button>
           </div>
-        </template>
-        <div class="preview">
-          <WheelCanvas :items="buffer.items" :size="isMobile ? 280 : 360" />
-        </div>
-      </el-card>
-    </el-main>
 
-    <!-- 移动端无内容时的提示 -->
-    <el-main v-else-if="isMobile" class="mobile-empty-main">
-      <el-empty description="请选择一个套餐进行编辑">
-        <el-button type="primary" @click="addSet">创建新套餐</el-button>
-      </el-empty>
-    </el-main>
+          <transition-group name="list" tag="ul" class="item-list">
+            <li
+              v-for="(it, idx) in buffer.items"
+              :key="it.id"
+              draggable="true"
+              class="item-row"
+              @dragstart="onDragStart(idx, $event)"
+              @dragover.prevent
+              @drop="onDrop(idx)"
+            >
+              <div class="item-content">
+                <el-input
+                  v-model.trim="it.name"
+                  maxlength="12"
+                  size="small"
+                  class="item-input"
+                  placeholder="选项名称"
+                  show-word-limit
+                />
+                <el-input
+                  v-model.trim="it.description"
+                  maxlength="50"
+                  size="small"
+                  class="item-description"
+                  placeholder="备注信息(可选)"
+                  show-word-limit
+                />
+              </div>
+              <div class="row-actions">
+                <el-button
+                  size="small"
+                  class="move-btn"
+                  :disabled="idx === 0"
+                  @click="move(idx, -1)"
+                >
+                  上移
+                </el-button>
+                <el-button
+                  size="small"
+                  class="move-btn"
+                  :disabled="idx === buffer.items.length - 1"
+                  @click="move(idx, 1)"
+                >
+                  下移
+                </el-button>
+                <el-button size="small" type="danger" class="remove-btn" @click="removeItem(idx)">
+                  删除
+                </el-button>
+              </div>
+            </li>
+          </transition-group>
+
+          <div class="actions">
+            <el-button class="cancel-btn" @click="cancel">取消</el-button>
+            <el-button type="primary" class="save-btn" @click="save">保存</el-button>
+          </div>
+        </el-card>
+
+        <el-card class="mt12 preview-card" shadow="hover">
+          <template #header>
+            <div class="card-header small">
+              <span>预览</span>
+            </div>
+          </template>
+          <div class="preview">
+            <WheelCanvas :items="buffer.items" :size="isMobile ? 280 : 360" />
+          </div>
+        </el-card>
+      </el-main>
+
+      <!-- 移动端无内容时的提示 -->
+      <el-main v-else-if="isMobile" class="mobile-empty-main">
+        <el-empty description="请选择一个套餐进行编辑">
+          <el-button type="primary" @click="addSet">创建新套餐</el-button>
+        </el-empty>
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
@@ -215,17 +215,14 @@
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useWheelStore, type WheelItem } from '@/stores/wheel';
 import WheelCanvas from '@/components/wheel/WheelCanvas.vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { api } from '@/api/client';
+
+import AppHeader from '@/components/common/AppHeader.vue';
 
 const store = useWheelStore();
 const auth = useAuthStore();
-const router = useRouter();
-
-// 默认头像
-const defaultAvatar =
-  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
 
 // 响应式检测
 const isMobile = ref(false);
@@ -245,27 +242,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile);
 });
-
-// 处理登出
-async function handleLogout() {
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '确认退出', {
-      confirmButtonText: '确定退出',
-      cancelButtonText: '取消',
-      type: 'warning',
-      confirmButtonClass: 'el-button--danger',
-    });
-
-    await auth.logout();
-    ElMessage.success('已退出登录');
-    await router.push('/login');
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('Logout error:', error);
-      ElMessage.error('退出登录失败，请重试');
-    }
-  }
-}
 
 const wheelSets = computed(() => store.wheelSets);
 const activeId = computed({
@@ -312,8 +288,10 @@ function addItem() {
   if (!name) return ElMessage.warning('请输入选项名称');
   if (name.length > 12) return ElMessage.warning('选项名称不能超过12个字');
 
-  const id = `${Date.now()}`;
   const description = newItemDescription.value.trim();
+  if (description && description.length > 50) return ElMessage.warning('备注信息不能超过50个字');
+
+  const id = `${Date.now()}`;
 
   buffer.value.items.push({
     id,
@@ -357,19 +335,77 @@ function onDrop(idx: number) {
 function cancel() {
   buffer.value = snapshotFromStore();
 }
-function save() {
+
+async function save() {
   if (!buffer.value) return;
-  const name = buffer.value.name.trim().slice(0, 20) || '未命名';
-  const items = buffer.value.items
-    .map((i: WheelItem) => ({
-      ...i,
-      name: (i.name || '').trim().slice(0, 12), // 修改为12个字符限制
-      description: (i.description || '').trim() || undefined,
-    }))
-    .filter((i: WheelItem) => i.name);
-  store.updateSet(buffer.value.id, { name, items });
-  buffer.value = snapshotFromStore();
-  ElMessage.success('已保存');
+
+  try {
+    const setId = buffer.value.id;
+    const name = buffer.value.name.trim().slice(0, 20) || '未命名';
+
+    // 1. 更新套餐名称
+    await api.patch(`/wheel-sets/${setId}`, { name });
+
+    // 2. 获取当前数据库中的项目
+    const currentSet = await api.get<{ items: WheelItem[] }>(`/wheel-sets/${setId}`);
+    const currentItems = currentSet.items || [];
+    const currentItemIds = new Set(currentItems.map((i: WheelItem) => i.id));
+
+    // 3. 处理前端的项目数据
+    const frontendItems = buffer.value.items
+      .map((i: WheelItem) => ({
+        id: i.id,
+        name: (i.name || '').trim().slice(0, 12),
+        description: i.description?.trim().slice(0, 50) || null,
+        color: i.color || null,
+      }))
+      .filter((i: any) => i.name);
+
+    const frontendItemIds = new Set(frontendItems.map((i) => i.id));
+
+    // 4. 删除不存在的项目
+    for (const item of currentItems) {
+      if (!frontendItemIds.has(item.id)) {
+        await api.delete(`/wheel-sets/${setId}/items/${item.id}`);
+      }
+    }
+
+    // 5. 新增或更新项目
+    for (const [index, item] of frontendItems.entries()) {
+      if (currentItemIds.has(item.id)) {
+        // 更新现有项目
+        await api.patch(`/wheel-sets/${setId}/items/${item.id}`, {
+          name: item.name,
+          description: item.description,
+          color: item.color,
+        });
+      } else {
+        // 新增项目
+        await api.post(`/wheel-sets/${setId}/items`, {
+          name: item.name,
+          description: item.description,
+          color: item.color,
+          order: index,
+        });
+      }
+    }
+
+    // 6. 重新排序
+    await api.post(`/wheel-sets/${setId}/items:reorder`, {
+      items: frontendItems.map((item: any, index: number) => ({
+        id: item.id,
+        order: index,
+      })),
+    });
+
+    // 重新加载数据
+    await store.load();
+    buffer.value = snapshotFromStore();
+    ElMessage.success('已保存');
+  } catch (error) {
+    console.error('保存失败:', error);
+    ElMessage.error('保存失败，请重试');
+  }
 }
 
 watch(
@@ -390,6 +426,12 @@ watch(
   min-height: 100vh;
 }
 
+/* 内容容器 */
+.content-container {
+  flex: 1;
+  min-height: 0; /* 防止flex子项撑开父容器 */
+}
+
 /* 移动端将容器改为纵向堆叠，避免 aside 占满宽度挤掉主内容 */
 .mobile-column {
   flex-direction: column;
@@ -399,6 +441,7 @@ watch(
 .side {
   padding: 8px;
   transition: all 0.3s ease;
+  border-right: 1px solid #e4e7ed;
 }
 
 .side-card {
@@ -407,6 +450,8 @@ watch(
 
 .mobile-side {
   padding: 12px;
+  border-right: none;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 /* 移动端套餐选择器 */
@@ -456,39 +501,16 @@ watch(
   width: 100%;
 }
 
-/* 用户信息样式 */
-.user-section {
-  margin: 8px 0;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.user-name {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-
-.user-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.user-actions .el-button {
-  justify-content: flex-start;
-  padding: 4px 0;
+.home-btn {
+  flex-shrink: 0;
 }
 
 /* 主内容区域 */
 .main {
   padding: 8px;
   transition: all 0.3s ease;
+  flex: 1;
+  min-width: 0; /* 防止内容溢出 */
 }
 
 .mobile-main {
@@ -541,7 +563,8 @@ watch(
   min-width: 200px;
 }
 
-.new-item-input {
+.new-item-input,
+.new-item-description {
   flex: 1;
   min-width: 200px;
 }
@@ -584,10 +607,7 @@ watch(
   margin-right: 8px;
 }
 
-.item-input {
-  width: 100%;
-}
-
+.item-input,
 .item-description {
   width: 100%;
 }
@@ -649,7 +669,8 @@ watch(
     align-items: stretch;
   }
 
-  .new-item-input {
+  .new-item-input,
+  .new-item-description {
     min-width: 100%;
   }
 
@@ -715,7 +736,8 @@ watch(
     align-items: center;
   }
 
-  .new-item-input {
+  .new-item-input,
+  .new-item-description {
     min-width: 300px;
   }
 }

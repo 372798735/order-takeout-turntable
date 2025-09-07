@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>移动端转盘居中效果测试</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #fffbfe;
+        padding: 20px 0;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .demo-header {
+        padding: 16px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+        color: #333;
+      }
+
+      /* 基础转盘容器样式 */
+      .wheel-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 8px;
+        min-height: 300px;
+        background: #fff;
+      }
+
+      .wheel {
+        max-width: 100%;
+        height: auto;
+        border: 3px solid #409eff;
+        border-radius: 50%;
+        background: conic-gradient(
+          #ff6b6b 0deg 60deg,
+          #4ecdc4 60deg 120deg,
+          #45b7d1 120deg 180deg,
+          #96ceb4 180deg 240deg,
+          #feca57 240deg 300deg,
+          #ff9ff3 300deg 360deg
+        );
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 移动端样式 (768px以下) */
+      @media (max-width: 768px) {
+        .wheel-wrap {
+          min-height: 320px;
+          padding: 16px;
+        }
+
+        .wheel {
+          max-width: 95%;
+          width: 320px;
+          height: 320px;
+        }
+      }
+
+      /* 小屏移动端样式 (480px以下) */
+      @media (max-width: 480px) {
+        .wheel-wrap {
+          min-height: 300px;
+          padding: 20px 16px;
+        }
+
+        .wheel {
+          max-width: 90%;
+          width: 300px;
+          height: 300px;
+          font-size: 16px;
+        }
+      }
+
+      /* 平板和PC样式 (769px以上) */
+      @media (min-width: 769px) {
+        .wheel-wrap {
+          min-height: 440px;
+          padding: 20px;
+        }
+
+        .wheel {
+          max-width: 100%;
+          width: 420px;
+          height: 420px;
+        }
+      }
+
+      /* 大屏PC样式 (1024px以上) */
+      @media (min-width: 1024px) {
+        .wheel-wrap {
+          min-height: 500px;
+          padding: 24px;
+        }
+
+        .wheel {
+          max-width: 100%;
+          width: 480px;
+          height: 480px;
+          font-size: 20px;
+        }
+      }
+
+      .info-panel {
+        padding: 16px;
+        background: #f0f9ff;
+        border-left: 4px solid #409eff;
+        margin: 20px 16px;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .info-panel h3 {
+        margin: 0 0 12px 0;
+        color: #333;
+      }
+
+      .info-panel ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #666;
+      }
+
+      .info-panel li {
+        margin-bottom: 8px;
+      }
+
+      .viewport-info {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="viewport-info" id="viewport-info">视口: <span id="viewport-size"></span></div>
+
+    <div class="container">
+      <h1 style="text-align: center; margin-bottom: 30px; color: #333">移动端转盘居中效果测试</h1>
+
+      <!-- 当前效果演示 -->
+      <div class="demo-section">
+        <div class="demo-header">✨ 优化后的转盘居中效果</div>
+        <div class="wheel-wrap">
+          <div class="wheel">幸运转盘</div>
+        </div>
+      </div>
+
+      <!-- 功能说明 -->
+      <div class="info-panel">
+        <h3>🎯 优化内容</h3>
+        <ul>
+          <li><strong>更好的居中对齐</strong>：使用 flexbox 替代 grid 布局，确保完美居中</li>
+          <li><strong>响应式尺寸</strong>：不同屏幕尺寸下转盘大小自动适配</li>
+          <li><strong>适当的内边距</strong>：移动端增加更多内边距，避免转盘贴边</li>
+          <li><strong>最大宽度限制</strong>：防止转盘在小屏幕上过大</li>
+        </ul>
+      </div>
+
+      <div class="info-panel">
+        <h3>📱 断点说明</h3>
+        <ul>
+          <li><strong>≤480px</strong>: 300×300px 转盘，90% 最大宽度</li>
+          <li><strong>481px-768px</strong>: 320×320px 转盘，95% 最大宽度</li>
+          <li><strong>769px-1023px</strong>: 420×420px 转盘</li>
+          <li><strong>≥1024px</strong>: 480×480px 转盘</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      function updateViewportInfo() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const info = document.getElementById('viewport-size');
+        info.textContent = `${width}×${height}px`;
+
+        // 显示当前断点
+        let breakpoint = '';
+        if (width <= 480) {
+          breakpoint = ' (小屏移动端)';
+        } else if (width <= 768) {
+          breakpoint = ' (移动端)';
+        } else if (width <= 1023) {
+          breakpoint = ' (平板)';
+        } else {
+          breakpoint = ' (PC)';
+        }
+        info.textContent += breakpoint;
+      }
+
+      // 初始化和窗口大小变化时更新
+      updateViewportInfo();
+      window.addEventListener('resize', updateViewportInfo);
+
+      // 添加转盘点击效果
+      document.querySelector('.wheel').addEventListener('click', function () {
+        this.style.transform = 'rotate(360deg)';
+        this.style.transition = 'transform 1s ease-in-out';
+        setTimeout(() => {
+          this.style.transform = 'rotate(0deg)';
+          this.style.transition = 'none';
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>

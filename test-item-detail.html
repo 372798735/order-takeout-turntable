@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试选项详情页备注功能</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #fffbfe;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .demo-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      }
+      .item-name h2 {
+        margin: 0 0 12px 0;
+        font-size: 24px;
+        color: #1f1f1f;
+      }
+      .color-tag {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #409eff;
+        color: white;
+        border-radius: 16px;
+        font-size: 12px;
+        margin-bottom: 16px;
+      }
+      .item-description {
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #409eff;
+        margin-bottom: 16px;
+      }
+      .item-description h3 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        color: #333;
+        font-weight: 600;
+      }
+      .item-description p {
+        margin: 0;
+        line-height: 1.6;
+        color: #666;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+      .meta-item {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .label {
+        font-weight: 500;
+        color: #666;
+        min-width: 80px;
+      }
+      .value {
+        color: #333;
+      }
+      .no-description {
+        color: #999;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>选项详情页备注功能演示</h1>
+
+      <!-- 有备注的选项 -->
+      <div class="demo-card">
+        <div class="item-name">
+          <h2>麻辣香锅</h2>
+          <span class="color-tag">颜色: #ff6b6b</span>
+        </div>
+
+        <div class="item-description">
+          <h3>备注</h3>
+          <p>推荐加土豆、金针菇、豆腐皮 价格适中，口味偏辣 营业时间：11:00-21:00</p>
+        </div>
+
+        <div class="meta-item">
+          <span class="label">所属套餐:</span>
+          <span class="value">今天吃什么</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">创建时间:</span>
+          <span class="value">2025/9/7 21:30:15</span>
+        </div>
+      </div>
+
+      <!-- 没有备注的选项 -->
+      <div class="demo-card">
+        <div class="item-name">
+          <h2>牛肉面</h2>
+          <span class="color-tag">颜色: #4ecdc4</span>
+        </div>
+
+        <!-- 没有备注时不显示备注区域 -->
+        <div class="no-description">此选项没有备注信息</div>
+
+        <div class="meta-item">
+          <span class="label">所属套餐:</span>
+          <span class="value">今天吃什么</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">创建时间:</span>
+          <span class="value">2025/9/7 21:25:10</span>
+        </div>
+      </div>
+
+      <!-- 长备注的选项 -->
+      <div class="demo-card">
+        <div class="item-name">
+          <h2>日式拉面</h2>
+        </div>
+
+        <div class="item-description">
+          <h3>备注</h3>
+          <p>
+            豚骨拉面，汤头浓郁 推荐配菜：叉烧、溏心蛋、海苔 店铺地址：xx路xx号 电话：138-xxxx-xxxx
+            人均消费：45-60元 特别提醒：周一休息
+          </p>
+        </div>
+
+        <div class="meta-item">
+          <span class="label">所属套餐:</span>
+          <span class="value">今天吃什么</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

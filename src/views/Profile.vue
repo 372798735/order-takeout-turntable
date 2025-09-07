@@ -20,9 +20,15 @@
 
         <el-form label-width="80px" class="form" :model="form">
           <el-form-item label="头像">
-            <div class="avatar-row">
-              <el-avatar :size="72" :src="form.avatar || defaultAvatar" />
-              <el-input v-model.trim="form.avatar" placeholder="粘贴头像图片URL" />
+            <div class="avatar-display">
+              <div class="avatar-preview">
+                <img
+                  :src="currentAvatarSrc"
+                  alt="用户头像"
+                  class="avatar-img"
+                  @error="handleImageError"
+                />
+              </div>
             </div>
           </el-form-item>
           <el-form-item label="昵称">
@@ -65,7 +71,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref } from 'vue';
+import { reactive, onMounted, ref, computed } from 'vue';
 import { User, SwitchButton } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api/client';
@@ -74,20 +80,43 @@ import { useRouter } from 'vue-router';
 
 const auth = useAuthStore();
 const router = useRouter();
-const defaultAvatar =
-  'https://cdn.nlark.com/yuque/0/2025/png/2488285/1755621011638-55f138ac-e500-45aa-8618-193902552145.png?x-oss-process=image%2Fformat%2Cwebp';
+const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png';
+const imageError = ref(false);
 
 const form = reactive({
-  avatar: '',
   nickname: '',
   gender: 'UNKNOWN',
 });
 const saving = ref(false);
 const loggingOut = ref(false);
 
+// 计算头像源，确保总是有有效的图片URL
+const avatarSrc = computed(() => {
+  const userAvatar = auth.user?.avatar;
+  if (userAvatar && userAvatar.trim() !== '') {
+    return userAvatar;
+  }
+  return defaultAvatar;
+});
+
+// 当前显示的头像源（考虑错误状态）
+const currentAvatarSrc = computed(() => {
+  if (imageError.value) {
+    return defaultAvatar;
+  }
+  return avatarSrc.value;
+});
+
+function handleImageError() {
+  imageError.value = true;
+  // 重置错误状态，以便用户头像更新后能重新尝试加载
+  setTimeout(() => {
+    imageError.value = false;
+  }, 1000);
+}
+
 function load() {
   const u = auth.user || {};
-  form.avatar = u.avatar || '';
   form.nickname = u.nickname || '';
   form.gender = u.gender || 'UNKNOWN';
 }
@@ -101,9 +130,8 @@ async function save() {
   saving.value = true;
   try {
     const updated = await api.patch('/me', {
-      avatar: form.avatar || undefined,
-      nickname: form.nickname || undefined,
-      gender: form.gender || undefined,
+      nickname: form.nickname.trim() || null,
+      gender: form.gender || null,
     });
     auth.user = updated;
     auth.saveToStorage();
@@ -179,11 +207,30 @@ async function handleLogout() {
 .form {
   padding-top: 4px;
 }
-.avatar-row {
+.avatar-display {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: flex-start;
+}
+
+.avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #e4e7ed;
+  transition: border-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.avatar-preview:hover {
+  border-color: #409eff;
+}
+
+.avatar-img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .actions {

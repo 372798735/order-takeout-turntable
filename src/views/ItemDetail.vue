@@ -29,8 +29,8 @@
               </el-tag>
             </div>
 
-            <div class="item-description" v-if="item.description">
-              <h3>备注信息</h3>
+            <div v-if="item.description" class="item-description">
+              <h3>备注</h3>
               <p>{{ item.description }}</p>
             </div>
 
@@ -41,11 +41,11 @@
               </div>
               <div class="meta-item">
                 <span class="label">创建时间:</span>
-                <span class="value">{{ formatDate(item.createdAt) }}</span>
+                <span class="value">{{ formatDate(item.createdAt || '') }}</span>
               </div>
               <div class="meta-item">
                 <span class="label">最后更新:</span>
-                <span class="value">{{ formatDate(item.updatedAt) }}</span>
+                <span class="value">{{ formatDate(item.updatedAt || '') }}</span>
               </div>
             </div>
           </div>
@@ -105,10 +105,10 @@ onMounted(async () => {
     const itemId = route.params.itemId as string;
 
     // 查找对应的套餐和选项
-    const wheelSet = wheelStore.wheelSets.find((set) => set.id === setId);
+    const wheelSet = wheelStore.wheelSets.find((set: any) => set.id === setId);
     if (wheelSet) {
       setName.value = wheelSet.name;
-      item.value = wheelSet.items.find((it) => it.id === itemId) || null;
+      item.value = wheelSet.items.find((it: any) => it.id === itemId) || null;
     }
   } catch (error) {
     console.error('Load item detail error:', error);
@@ -189,10 +189,18 @@ function goToManagement() {
   align-self: flex-start;
 }
 
+.item-description {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #409eff;
+}
+
 .item-description h3 {
   margin: 0 0 8px 0;
   font-size: 16px;
   color: #333;
+  font-weight: 600;
 }
 
 .item-description p {
@@ -200,6 +208,7 @@ function goToManagement() {
   line-height: 1.6;
   color: #666;
   white-space: pre-wrap;
+  font-size: 14px;
 }
 
 .item-meta {

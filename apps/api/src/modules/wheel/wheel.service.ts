@@ -70,10 +70,10 @@ export class WheelService {
     return this.prisma.wheelItem.update({
       where: { id: itemId },
       data: {
-        name: data.name,
-        description: data.description ?? undefined,
-        color: data.color ?? undefined,
-        order: data.order ?? undefined,
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.color !== undefined && { color: data.color }),
+        ...(data.order !== undefined && { order: data.order }),
       },
     });
   }
@@ -119,5 +119,95 @@ export class WheelService {
       results.push(await this.getSet(userId, created.id));
     }
     return { imported: results.length, wheelSets: results };
+  }
+
+  async batchUpdateSet(
+    userId: string,
+    setId: string,
+    data: {
+      name?: string;
+      items?: Array<{
+        id?: string;
+        name: string;
+        description?: string | null;
+        color?: string | null;
+        order: number;
+      }>;
+    },
+  ) {
+    // 验证套餐所有权
+    const set = await this.prisma.wheelSet.findFirst({
+      where: { id: setId, userId },
+      include: { items: true },
+    });
+    if (!set) {
+      throw new Error('Wheel set not found');
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      // 更新套餐名称
+      if (data.name !== undefined) {
+        await tx.wheelSet.update({
+          where: { id: setId },
+          data: { name: data.name },
+        });
+      }
+
+      // 处理items
+      if (data.items !== undefined) {
+        const currentItems = set.items;
+        const newItems = data.items;
+
+        // 收集现有和新的ID
+        const currentIds = new Set(currentItems.map((item) => item.id));
+        const newIds = new Set(newItems.filter((item) => item.id).map((item) => item.id!));
+        const newItemIds = new Set<string>();
+
+        // 删除不在新列表中的items
+        const idsToDelete = currentItems
+          .filter((item) => !newIds.has(item.id))
+          .map((item) => item.id);
+
+        if (idsToDelete.length > 0) {
+          await tx.wheelItem.deleteMany({
+            where: { id: { in: idsToDelete } },
+          });
+        }
+
+        // 处理新items和更新现有items
+        for (const item of newItems) {
+          if (item.id && currentIds.has(item.id)) {
+            // 更新现有item
+            await tx.wheelItem.update({
+              where: { id: item.id },
+              data: {
+                name: item.name,
+                description: item.description ?? null,
+                color: item.color ?? null,
+                order: item.order,
+              },
+            });
+          } else {
+            // 创建新item
+            const created = await tx.wheelItem.create({
+              data: {
+                setId,
+                name: item.name,
+                description: item.description ?? null,
+                color: item.color ?? null,
+                order: item.order,
+              },
+            });
+            newItemIds.add(created.id);
+          }
+        }
+      }
+
+      // 返回更新后的完整数据
+      return await tx.wheelSet.findFirst({
+        where: { id: setId, userId },
+        include: { items: { orderBy: { order: 'asc' } } },
+      });
+    });
   }
 }

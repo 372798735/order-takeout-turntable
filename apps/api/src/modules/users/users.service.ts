@@ -47,7 +47,9 @@ export class UsersService {
       where: { id: userId },
       data: {
         ...(data.nickname !== undefined ? { nickname: data.nickname } : {}),
-        ...(data.avatar !== undefined ? { avatar: data.avatar } : {}),
+        ...(data.avatar !== undefined && data.avatar !== null && data.avatar.trim() !== ''
+          ? { avatar: data.avatar }
+          : {}),
         ...(data.gender !== undefined ? { gender: data.gender as any } : {}),
       },
     });

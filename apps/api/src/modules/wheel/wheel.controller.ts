@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { IsArray, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AuthGuard } from '@nestjs/passport';
@@ -69,6 +80,38 @@ class ReorderDto {
   items!: ReorderDtoEntry[];
 }
 
+class BatchUpdateItemDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+
+  @IsOptional()
+  @IsString()
+  color?: string | null;
+
+  @IsInt()
+  order!: number;
+}
+
+class BatchUpdateSetDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BatchUpdateItemDto)
+  items?: BatchUpdateItemDto[];
+}
+
 @UseGuards(AuthGuard('jwt'))
 @Controller('wheel-sets')
 export class WheelController {
@@ -126,5 +169,10 @@ export class WheelController {
       id,
       dto.items.map((i) => ({ id: i.id, order: i.order })),
     );
+  }
+
+  @Put(':id/batch')
+  batchUpdate(@Req() req: any, @Param('id') id: string, @Body() dto: BatchUpdateSetDto) {
+    return this.wheel.batchUpdateSet(req.user.userId, id, dto);
   }
 }

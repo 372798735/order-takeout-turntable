@@ -1,6 +1,12 @@
 <template>
   <div class="wheel-wrap">
-    <canvas ref="canvasRef" :width="size" :height="size" @click="handleCanvasClick" />
+    <canvas
+      ref="canvasRef"
+      :width="size"
+      :height="size"
+      :class="{ spinning: spinning }"
+      @click="handleCanvasClick"
+    />
     <canvas ref="particleCanvasRef" :width="size" :height="size" class="particle-canvas" />
     <div class="pointer glow" :class="{ 'pointer-active': spinning }"></div>
     <div class="hub" :class="{ breathing: spinning }"></div>
@@ -51,7 +57,7 @@ interface WheelItem {
 const props = defineProps<{ items: WheelItem[]; size?: number }>();
 const emit = defineEmits<{
   (e: 'end', item: WheelItem | null): void;
-  (e: 'itemClick', item: WheelItem): void;
+  (e: 'item-click', item: WheelItem): void;
 }>();
 
 const size = props.size ?? 520;
@@ -455,7 +461,7 @@ function handleCanvasClick(event: MouseEvent) {
   const item = items[clickedIndex];
 
   if (item) {
-    emit('itemClick', item);
+    emit('item-click', item);
   }
 }
 
@@ -483,6 +489,23 @@ canvas {
   height: 100%;
   border-radius: 50%;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+canvas:hover:not(.spinning) {
+  transform: scale(1.02);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+canvas:active:not(.spinning) {
+  transform: scale(0.98);
+}
+
+canvas.spinning {
+  cursor: default;
 }
 
 .particle-canvas {
