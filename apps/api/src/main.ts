@@ -9,37 +9,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  // 允许指定来源和所有来源访问，解决跨域问题
-  const allowedOrigins = [
-    'http://localhost:5000',
-    'http://localhost:8080',
-    'http://47.113.179.233:5000',
-    'http://47.113.179.233:8080',
-    // 如果需要支持 HTTPS
-    'https://47.113.179.233:5000',
-    'https://47.113.179.233:8080',
-  ];
-
+  // 允许所有来源访问，解决跨域问题
   app.enableCors({
-    origin: (origin, callback) => {
-      // 允许没有 origin 的请求（如 Postman、移动应用等）
-      if (!origin) return callback(null, true);
-
-      // 检查是否在允许列表中
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // 开发环境允许所有 localhost 和 127.0.0.1
-      if (process.env.NODE_ENV !== 'production') {
-        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-          return callback(null, true);
-        }
-      }
-
-      // 其他情况也允许（保持兼容性）
-      return callback(null, true);
-    },
+    origin: true, // 允许所有来源
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
       'Content-Type',

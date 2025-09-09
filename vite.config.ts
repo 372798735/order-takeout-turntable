@@ -23,8 +23,8 @@ export default defineConfig(({ mode }) => ({
     // 只在开发环境使用代理
     proxy: {
       '/api': {
-        // target: 'http://47.113.179.233:3001',  // 生产
-        target: 'http://192.168.1.2:3001', // 开发
+        target: 'http://192.168.1.2:3001', // 生产
+        // target: 'http://192.168.1.2:8080', // 开发
         changeOrigin: true,
         secure: false, // 如果是 HTTPS 且证书有问题，设置为 false
         configure: (proxy, _options) => {
