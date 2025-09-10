@@ -50,7 +50,7 @@ async function bootstrap() {
     });
   }
   const port = Number(process.env.PORT || 3001);
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0'); // 监听所有接口，支持外部访问
 
   // 获取当前服务器的 IP 地址
   function getLocalIPAddress(): Array<{ interface: string; address: string }> {

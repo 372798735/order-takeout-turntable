@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./prisma/dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -34,17 +34,15 @@ model WheelSet {
 }
 
 model WheelItem {
-  id        String   @id @default(cuid())
-  setId     String
-  name      String
+  id          String   @id @default(cuid())
+  setId       String
+  name        String
   description String? // 备注字段，不在转盘上显示
-  color     String?
-  order     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  set       WheelSet @relation(fields: [setId], references: [id])
+  color       String?
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  set         WheelSet @relation(fields: [setId], references: [id])
 
   @@index([setId])
 }
-
-
