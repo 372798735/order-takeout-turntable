@@ -67,6 +67,13 @@ export class WheelService {
   ) {
     const set = await this.prisma.wheelSet.findFirst({ where: { id: setId, userId } });
     if (!set) throw new NotFoundException('Wheel set not found');
+
+    // 验证项目是否存在且属于该套餐
+    const existingItem = await this.prisma.wheelItem.findFirst({
+      where: { id: itemId, setId },
+    });
+    if (!existingItem) throw new NotFoundException('Wheel item not found');
+
     return this.prisma.wheelItem.update({
       where: { id: itemId },
       data: {
@@ -88,8 +95,22 @@ export class WheelService {
   async reorderItems(userId: string, setId: string, orders: { id: string; order: number }[]) {
     const set = await this.prisma.wheelSet.findFirst({ where: { id: setId, userId } });
     if (!set) throw new NotFoundException('Wheel set not found');
+
+    // 验证所有项目都存在且属于该套餐
+    const existingItems = await this.prisma.wheelItem.findMany({
+      where: { setId, id: { in: orders.map((o) => o.id) } },
+      select: { id: true },
+    });
+
+    const existingIds = new Set(existingItems.map((item) => item.id));
+    const validOrders = orders.filter((o) => existingIds.has(o.id));
+
+    if (validOrders.length === 0) {
+      throw new NotFoundException('No valid wheel items found for reordering');
+    }
+
     await this.prisma.$transaction(
-      orders.map((o) =>
+      validOrders.map((o) =>
         this.prisma.wheelItem.update({ where: { id: o.id }, data: { order: o.order } }),
       ),
     );
@@ -177,16 +198,35 @@ export class WheelService {
         // 处理新items和更新现有items
         for (const item of newItems) {
           if (item.id && currentIds.has(item.id)) {
-            // 更新现有item
-            await tx.wheelItem.update({
-              where: { id: item.id },
-              data: {
-                name: item.name,
-                description: item.description ?? null,
-                color: item.color ?? null,
-                order: item.order,
-              },
+            // 验证项目是否仍然存在（避免并发删除问题）
+            const existsInDb = await tx.wheelItem.findFirst({
+              where: { id: item.id, setId },
             });
+
+            if (existsInDb) {
+              // 更新现有item
+              await tx.wheelItem.update({
+                where: { id: item.id },
+                data: {
+                  name: item.name,
+                  description: item.description ?? null,
+                  color: item.color ?? null,
+                  order: item.order,
+                },
+              });
+            } else {
+              // 如果项目不存在，创建新的
+              const created = await tx.wheelItem.create({
+                data: {
+                  setId,
+                  name: item.name,
+                  description: item.description ?? null,
+                  color: item.color ?? null,
+                  order: item.order,
+                },
+              });
+              newItemIds.add(created.id);
+            }
           } else {
             // 创建新item
             const created = await tx.wheelItem.create({
