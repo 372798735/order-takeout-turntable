@@ -23,7 +23,7 @@
                   <!-- 移动端垂直布局，PC端水平布局 -->
                   <div class="set-select-container">
                     <div class="set-select">
-                      <span class="set-label">当前套餐：</span>
+                      <span class="set-label">当前转盘：</span>
                       <el-select
                         v-model="currentId"
                         size="small"
@@ -38,7 +38,9 @@
                         />
                       </el-select>
                     </div>
+                    <!-- PC端保留开始转动按钮 -->
                     <el-button
+                      v-show="!isMobile"
                       type="primary"
                       class="spin-btn"
                       :disabled="isSpinning || itemsForWheel.length === 0"
@@ -52,23 +54,30 @@
               </template>
 
               <transition name="fade-up" appear>
-                <div class="wheel-wrap">
+                <div class="wheel-container">
+                  <!-- 当前指向的项目显示 -->
+                  <div
+                    class="current-item-display"
+                    :class="{
+                      'result-mode': !isSpinning && lastResult,
+                      'spinning-mode': isSpinning,
+                    }"
+                  >
+                    <span class="current-item-text">{{ currentItemText }}</span>
+                  </div>
                   <WheelCanvas
                     ref="wheelRef"
                     class="wheel"
                     :items="itemsForWheel"
                     @end="onSpinEnd"
                     @item-click="onItemClick"
+                    @hub-click="spin"
+                    @current-change="onCurrentChange"
                   />
                 </div>
               </transition>
 
-              <transition name="pop">
-                <p v-if="lastResult" class="result" :class="{ celebration: showCelebration }">
-                  <el-icon color="#67C23A"><SuccessFilled /></el-icon>
-                  结果：<strong>{{ lastResult.name }}</strong>
-                </p>
-              </transition>
+              <!-- 结果现在显示在转盘上方的当前项目显示区域 -->
             </el-card>
           </el-col>
 
@@ -95,6 +104,7 @@
               <el-alert title="小提示" type="info" show-icon :closable="false">
                 <p>使用管理页可添加/排序选项，建议保持 6~12 个扇区获得更佳视觉与节奏。</p>
                 <p>💡 点击转盘上的任意选项可查看详情信息！</p>
+                <p>🎯 点击中心的GO按钮开始转盘抽取！</p>
               </el-alert>
             </el-card>
           </el-col>
@@ -105,7 +115,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useWheelStore } from '@/stores/wheel';
 import WheelCanvas from '@/components/wheel/WheelCanvas.vue';
 import { ElMessage } from 'element-plus';
@@ -119,9 +129,18 @@ const wheelRef = ref(null);
 const auth = useAuthStore();
 const router = useRouter();
 
+// 响应式检测
+const isMobile = ref(false);
+
+function checkMobile() {
+  isMobile.value = window.innerWidth <= 768;
+}
+
 onMounted(() => {
   store.load();
   auth.fetchMe().catch(() => {});
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
   // 避免刷新或中途离开页面时 isSpinning 被持久化导致按钮一直禁用
   store.setSpinning(false);
   // 若当前套餐无效（为空或已被删除），自动选中第一个
@@ -137,6 +156,10 @@ onMounted(() => {
   }
 });
 
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
+
 const wheelSets = computed(() => store.wheelSets);
 const currentId = computed({
   get: () => store.currentWheelSetId,
@@ -148,6 +171,9 @@ const lastResult = computed(() => store.lastResult);
 
 // 庆祝动画状态
 const showCelebration = ref(false);
+
+// 当前指向的项目文字
+const currentItemText = ref('??');
 
 function onChangeSet() {}
 
@@ -187,11 +213,42 @@ function onSpinEnd(item) {
 
 // 处理转盘项目点击
 function onItemClick(item) {
+  // 转盘旋转中不响应点击
+  if (isSpinning.value) {
+    return;
+  }
+
   const currentSetId = store.currentWheelSetId;
   if (currentSetId && item.id) {
     router.push(`/item/${currentSetId}/${item.id}`);
   }
 }
+
+// 处理当前项变化
+function onCurrentChange(item) {
+  if (item && item.name) {
+    currentItemText.value = item.name;
+  } else if (isSpinning.value) {
+    currentItemText.value = '??';
+  } else {
+    currentItemText.value = '??';
+  }
+}
+
+// 监听转盘状态变化，更新当前项目显示
+watch(
+  [isSpinning, lastResult],
+  ([spinning, result]) => {
+    if (!spinning && result) {
+      // 转盘停止且有结果时，显示结果
+      currentItemText.value = `🎉 ${result.name}`;
+    } else if (!spinning) {
+      // 转盘停止但无结果时，显示问号
+      currentItemText.value = '??';
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
@@ -263,21 +320,90 @@ function onItemClick(item) {
 
 /* 转盘卡片 */
 .wheel-card :deep(.el-card__body) {
-  padding: 8px;
-}
-
-.wheel-wrap {
+  padding: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px;
-  min-height: 300px;
+}
+
+.wheel-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 400px;
+  gap: 16px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .wheel {
   max-width: 100%;
   height: auto;
 }
+
+/* 当前项目显示 */
+.current-item-display {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  margin-bottom: 8px;
+  transition: all 0.5s ease;
+}
+
+.current-item-display.result-mode {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  animation: celebration-pulse 1s ease-in-out;
+}
+
+.current-item-display.spinning-mode {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  animation: spinning-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes celebration-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spinning-glow {
+  0% {
+    box-shadow:
+      0 4px 15px rgba(0, 0, 0, 0.1),
+      0 0 20px rgba(240, 147, 251, 0.4);
+  }
+  100% {
+    box-shadow:
+      0 4px 15px rgba(0, 0, 0, 0.1),
+      0 0 30px rgba(240, 147, 251, 0.6);
+  }
+}
+
+.current-item-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  /* 移除可能导致闪烁的动画 */
+}
+
+/* 移除可能导致视觉干扰的glow动画 */
 
 /* 结果显示 */
 .result {
@@ -349,15 +475,26 @@ function onItemClick(item) {
     font-size: 18px;
   }
 
-  .wheel-wrap {
-    min-height: 320px;
-    padding: 16px;
+  .wheel-container {
+    min-height: 480px;
+    padding: 20px;
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .current-item-display {
+    min-width: 150px;
+    padding: 8px 16px;
+  }
+
+  .current-item-text {
+    font-size: 16px;
   }
 
   .wheel {
     max-width: 95%;
-    width: 320px;
-    height: 320px;
+    width: 420px; /* 进一步增大移动端转盘尺寸 */
+    height: 420px;
   }
 
   .result {
@@ -388,15 +525,26 @@ function onItemClick(item) {
     font-size: 20px;
   }
 
-  .wheel-wrap {
-    min-height: 300px;
-    padding: 20px 16px;
+  .wheel-container {
+    min-height: 450px;
+    padding: 24px 16px;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .current-item-display {
+    min-width: 180px;
+    padding: 10px 20px;
+  }
+
+  .current-item-text {
+    font-size: 18px;
   }
 
   .wheel {
-    max-width: 90%;
-    width: 300px;
-    height: 300px;
+    max-width: 110%;
+    width: 380px; /* 小屏幕设备也适当增大 */
+    height: 380px;
   }
 }
 
@@ -416,15 +564,17 @@ function onItemClick(item) {
     min-width: 120px;
   }
 
-  .wheel-wrap {
-    min-height: 440px;
-    padding: 20px;
+  .wheel-container {
+    min-height: 500px;
+    padding: 28px;
+    gap: 20px;
+    justify-content: center;
   }
 
   .wheel {
     max-width: 100%;
-    width: 420px;
-    height: 420px;
+    width: 520px; /* PC端也适当增大 */
+    height: 520px;
   }
 }
 
@@ -433,15 +583,17 @@ function onItemClick(item) {
     padding: 16px;
   }
 
-  .wheel-wrap {
-    min-height: 500px;
-    padding: 24px;
+  .wheel-container {
+    min-height: 560px;
+    padding: 32px;
+    gap: 20px;
+    justify-content: center;
   }
 
   .wheel {
     max-width: 100%;
-    width: 480px;
-    height: 480px;
+    width: 580px; /* 大屏幕设备保持更大尺寸 */
+    height: 580px;
   }
 }
 

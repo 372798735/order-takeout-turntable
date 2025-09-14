@@ -9,7 +9,7 @@
     />
     <canvas ref="particleCanvasRef" :width="size" :height="size" class="particle-canvas" />
     <div class="pointer glow" :class="{ 'pointer-active': spinning }"></div>
-    <div class="hub" :class="{ breathing: spinning }"></div>
+    <div class="hub" :class="{ breathing: spinning }" @click.stop="handleHubClick"></div>
 
     <!-- 特效层 -->
     <div class="effects-layer" :class="{ active: spinning }">
@@ -58,9 +58,11 @@ const props = defineProps<{ items: WheelItem[]; size?: number }>();
 const emit = defineEmits<{
   (e: 'end', item: WheelItem | null): void;
   (e: 'item-click', item: WheelItem): void;
+  (e: 'hub-click'): void;
+  (e: 'current-change', item: WheelItem | null): void;
 }>();
 
-const size = props.size ?? 520;
+const size = props.size ?? 580;
 const radius = size / 2;
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const particleCanvasRef = ref<HTMLCanvasElement | null>(null);
@@ -149,14 +151,15 @@ function drawWheel() {
     ctx.strokeStyle = 'rgba(255,255,255,.85)';
     ctx.stroke();
 
-    // 文字沿弧（最小字号 15px）
+    // 文字沿弧（增大字号以便移动端查看）
     ctx.save();
     ctx.rotate(start + anglePer / 2);
     ctx.textAlign = 'right';
     ctx.fillStyle = '#333';
-    ctx.font = '600 16px "Segoe UI", Roboto, "Microsoft Yahei", Arial, sans-serif';
+    const fontSize = Math.max(18, Math.min(24, radius / 12)); // 动态字体大小
+    ctx.font = `600 ${fontSize}px "Segoe UI", Roboto, "Microsoft Yahei", Arial, sans-serif`;
     const label = items[i]?.name ?? '—';
-    ctx.fillText(label, radius - 40, 6);
+    ctx.fillText(label, radius - 50, fontSize / 3);
     ctx.restore();
   }
 
@@ -322,6 +325,12 @@ function playTickIfNewSector() {
     tickRef.value?.currentTime && (tickRef.value.currentTime = 0);
     tickRef.value?.play().catch(() => {});
     lastTickSector = idx;
+
+    // 发送当前项变化事件
+    const items = props.items && props.items.length ? props.items : [{ id: '0', name: '—' }];
+    if (items[idx]) {
+      emit('current-change', items[idx]);
+    }
   }
 }
 
@@ -441,28 +450,41 @@ function handleCanvasClick(event: MouseEvent) {
   const dy = canvasY - centerY;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // 检查是否点击在转盘范围内（不包括中心圆）
-  const hubRadius = 30;
-  if (distance < hubRadius || distance > radius - 10) return;
+  // 中心圆的半径范围（包含GO按钮区域）
+  const hubRadius = 40;
 
-  // 计算点击的角度
+  // 如果点击在中心圆区域，不处理（让hub点击事件处理）
+  if (distance < hubRadius) return;
+
+  // 如果点击在转盘外圈，也不处理
+  if (distance > radius - 10) return;
+
+  // 点击在转盘内容区域时打开详情而不是旋转转盘
+  // 计算点击的角度（相对于12点钟方向）
   let angle = Math.atan2(dy, dx);
+  // 转换为从12点钟开始的角度
+  angle = angle + Math.PI / 2;
   if (angle < 0) angle += 2 * Math.PI;
 
-  // 考虑当前旋转角度
-  angle = (angle - (currentRotation * Math.PI) / 180 + 2 * Math.PI) % (2 * Math.PI);
-
-  // 计算点击的扇形索引
+  // 考虑当前旋转角度，计算实际的扇形索引
   const items = props.items;
   if (items.length === 0) return;
 
   const sectorAngle = (2 * Math.PI) / items.length;
-  const clickedIndex = Math.floor(angle / sectorAngle);
+  // 根据当前旋转角度调整角度计算
+  const adjustedAngle = (angle - currentRotation + 2 * Math.PI) % (2 * Math.PI);
+  const clickedIndex = Math.floor(adjustedAngle / sectorAngle) % items.length;
   const item = items[clickedIndex];
 
   if (item) {
     emit('item-click', item);
   }
+}
+
+// 处理中心圆点击事件
+function handleHubClick() {
+  if (spinningRef.value) return; // 转盘旋转中不响应点击
+  emit('hub-click');
 }
 
 defineExpose({ spin });
@@ -471,28 +493,59 @@ onMounted(() => {
   ctx = canvasRef.value?.getContext('2d') ?? null;
   particleCtx = particleCanvasRef.value?.getContext('2d') ?? null;
   drawWheel();
+
+  // 初始化时发送当前项
+  const items = props.items && props.items.length ? props.items : [];
+  if (items.length > 0) {
+    const idx = getFocusedIndex();
+    emit('current-change', items[idx] || null);
+  } else {
+    emit('current-change', null);
+  }
 });
 
-watch(() => props.items, drawWheel, { deep: true });
+watch(
+  () => props.items,
+  () => {
+    drawWheel();
+    // 当项目改变时，重新发送当前项
+    const items = props.items && props.items.length ? props.items : [];
+    if (items.length > 0) {
+      const idx = getFocusedIndex();
+      emit('current-change', items[idx] || null);
+    } else {
+      emit('current-change', null);
+    }
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped>
 .wheel-wrap {
   position: relative;
-  width: min(92vw, 520px);
+  right: 10px;
+  width: min(85vw, 580px);
+  height: min(85vw, 580px); /* 强制高度等于宽度 */
   aspect-ratio: 1 / 1;
-  margin-inline: auto;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 canvas {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 50%;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
   cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
+  object-fit: contain; /* 确保canvas保持比例 */
 }
 
 canvas:hover:not(.spinning) {
@@ -529,11 +582,11 @@ canvas.spinning {
   content: '';
   width: 0;
   height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-bottom: 22px solid #6750a4;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 24px solid #6750a4;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
-  transform: translateY(-44%);
+  transform: translateY(-82%); /* 移到外围 */
   transition: all 0.3s ease;
 }
 
@@ -544,7 +597,7 @@ canvas.spinning {
 .pointer-active::after {
   filter: drop-shadow(0 0 20px rgba(103, 80, 164, 0.8))
     drop-shadow(0 0 30px rgba(103, 80, 164, 0.6)) drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
-  transform: translateY(-44%) scale(1.1);
+  transform: translateY(-82%) scale(1.1);
 }
 
 /* 中心同心环（纯样式覆盖 Canvas 中心） */
@@ -553,28 +606,49 @@ canvas.spinning {
   inset: 0;
   display: grid;
   place-items: center;
-  pointer-events: none;
-  z-index: 15;
+  pointer-events: auto; /* 允许点击 */
+  z-index: 30;
+  cursor: pointer;
 }
 
 .hub::before {
-  content: '';
+  content: 'GO';
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #fff, #c9b7ff 70%, #7a5ce6);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  color: #333;
+  font-family: 'Segoe UI', Roboto, 'Microsoft Yahei', Arial, sans-serif;
 }
 
 .hub::after {
   content: '';
   position: absolute;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  border: 6px solid rgba(103, 80, 164, 0.25);
+  border: 3px solid rgba(103, 80, 164, 0.25);
   transition: all 0.3s ease;
+}
+
+.hub:hover::before {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.hub:hover::after {
+  border-color: rgba(103, 80, 164, 0.4);
+}
+
+.hub:active::before {
+  transform: scale(0.95);
 }
 
 .breathing::after {
@@ -793,6 +867,11 @@ canvas.spinning {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
+  .wheel-wrap {
+    width: min(90vw, 450px);
+    height: min(90vw, 450px);
+  }
+
   .sparkle {
     width: 4px;
     height: 4px;
@@ -805,6 +884,11 @@ canvas.spinning {
 }
 
 @media (max-width: 480px) {
+  .wheel-wrap {
+    width: min(92vw, 380px);
+    height: min(92vw, 380px);
+  }
+
   .sparkle {
     width: 3px;
     height: 3px;

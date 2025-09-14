@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { MagicStick, User, SwitchButton } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '@/stores/auth';
@@ -47,6 +47,7 @@ const router = useRouter();
 
 const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png';
 const imageError = ref(false);
+const failedUrls = ref(new Set<string>());
 
 // 计算头像源，确保总是有有效的图片URL
 const avatarSrc = computed(() => {
@@ -59,22 +60,43 @@ const avatarSrc = computed(() => {
 
 // 当前显示的头像源（考虑错误状态）
 const currentAvatarSrc = computed(() => {
-  if (imageError.value) {
+  const src = avatarSrc.value;
+  // 如果这个URL曾经加载失败过，直接使用默认头像
+  if (failedUrls.value.has(src)) {
     return defaultAvatar;
   }
-  return avatarSrc.value;
+  return src;
 });
+
+// 监听用户头像变化，清除失败缓存
+watch(
+  () => auth.user?.avatar,
+  (newAvatar, oldAvatar) => {
+    if (newAvatar !== oldAvatar) {
+      // 用户头像更新时，清除错误状态和失败URL缓存
+      imageError.value = false;
+      failedUrls.value.clear();
+    }
+  },
+);
 
 function goHome() {
   router.push('/');
 }
 
 function handleImageError(event: Event) {
-  imageError.value = true;
-  // 重置错误状态，以便用户头像更新后能重新尝试加载
-  setTimeout(() => {
-    imageError.value = false;
-  }, 1000);
+  const img = event.target as HTMLImageElement;
+  const src = img.src;
+
+  // 将失败的URL添加到失败列表中，避免重复尝试
+  failedUrls.value.add(src);
+
+  // 如果失败的不是默认头像，切换到默认头像
+  if (src !== defaultAvatar) {
+    imageError.value = true;
+    // 强制使用默认头像
+    img.src = defaultAvatar;
+  }
 }
 
 // 处理用户下拉菜单命令

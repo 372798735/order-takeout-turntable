@@ -22,7 +22,7 @@
         <el-card shadow="hover" class="side-card">
           <template #header>
             <div class="card-header small">
-              <span>套餐列表</span>
+              <span>转盘列表</span>
               <el-button type="primary" text size="small" class="add-btn" @click="addSet">
                 新建
               </el-button>
@@ -83,7 +83,7 @@
         <el-card shadow="hover" class="edit-card">
           <template #header>
             <div class="card-header small">
-              <span>编辑套餐</span>
+              <span>编辑转盘</span>
               <el-tag type="info" effect="plain" class="item-count">
                 {{ buffer.items.length }}/15
               </el-tag>
