@@ -1,0 +1,389 @@
+/**index.wxss**/
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* 头部样式已移除 */
+
+/* 主内容区域 */
+.main {
+  padding: 32rpx 16rpx 16rpx;
+}
+
+/* 转盘卡片 */
+.wheel-card {
+  margin-bottom: 24rpx;
+}
+
+.wheel-card .card-body {
+  padding: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 套餐选择容器 */
+.set-select-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  width: 100%;
+}
+
+.set-select {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.set-label {
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.set-dropdown {
+  flex: 1;
+  min-width: 400rpx;
+}
+
+.picker-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  border: 2rpx solid #e0e0e0;
+  font-size: 28rpx;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.picker-arrow {
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 转盘容器 */
+.wheel-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+  min-height: 800rpx;
+  gap: 32rpx;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 实时文案显示 */
+.realtime-text {
+  position: absolute;
+  top: 20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.realtime-text.active {
+  opacity: 1;
+  animation: textPulse 2s infinite;
+}
+
+.text-content {
+  display: inline-block;
+  padding: 16rpx 32rpx;
+  background: linear-gradient(135deg, #6750a4, #8b5cf6);
+  color: white;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4);
+  white-space: nowrap;
+}
+
+.wheel {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 当前项目显示 */
+.current-item-display {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 30rpx;
+  padding: 12rpx 24rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.1);
+  min-height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 240rpx;
+  transition: all 1s ease;
+}
+
+.current-item-display.result-mode {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  box-shadow: 0 12rpx 40rpx rgba(255, 107, 107, 0.4);
+  animation: celebration-pulse 1s ease-in-out;
+}
+
+.current-item-display.spinning-mode {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  animation: spinning-glow 1s ease-in-out infinite alternate;
+}
+
+.current-item-text {
+  color: white;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 状态卡片 */
+.status-card {
+  height: fit-content;
+}
+
+.status-list {
+  margin-bottom: 24rpx;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.status-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.divider {
+  height: 1rpx;
+  background: #f0f0f0;
+  margin: 24rpx 0;
+}
+
+/* 提示区域 */
+.tips {
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border-left: 8rpx solid #409eff;
+}
+
+.tip-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.tip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.tip-content text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 动画定义 */
+@keyframes celebration-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spinning-glow {
+  0% {
+    box-shadow:
+      0 8rpx 30rpx rgba(0, 0, 0, 0.1),
+      0 0 40rpx rgba(240, 147, 251, 0.4);
+  }
+  100% {
+    box-shadow:
+      0 8rpx 30rpx rgba(0, 0, 0, 0.1),
+      0 0 60rpx rgba(240, 147, 251, 0.6);
+  }
+}
+
+/* 过渡动画 */
+.fade-up {
+  animation: fadeUp 0.72s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 文案脉冲动画 */
+@keyframes textPulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: 0 12rpx 32rpx rgba(103, 80, 164, 0.6);
+  }
+}
+
+/* 响应式断点 */
+@media screen and (max-width: 768rpx) {
+  .main {
+    padding: 40rpx 24rpx 24rpx;
+  }
+
+  .set-select-container {
+    gap: 32rpx;
+  }
+
+  .set-select {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16rpx;
+  }
+
+  .set-dropdown {
+    min-width: 100%;
+  }
+
+  .wheel-container {
+    min-height: 960rpx;
+    padding: 40rpx;
+    gap: 48rpx;
+    justify-content: center;
+  }
+
+  .current-item-display {
+    min-width: 300rpx;
+    padding: 16rpx 32rpx;
+  }
+
+  .current-item-text {
+    font-size: 32rpx;
+  }
+
+  .wheel {
+    max-width: 95%;
+    width: 840rpx;
+    height: 840rpx;
+  }
+}
+
+@media screen and (max-width: 480rpx) {
+  .main {
+    padding: 48rpx 32rpx 32rpx;
+  }
+
+  .set-select-container {
+    gap: 40rpx;
+  }
+
+  .wheel-container {
+    min-height: 900rpx;
+    padding: 48rpx 32rpx;
+    gap: 40rpx;
+    justify-content: center;
+  }
+
+  .current-item-display {
+    min-width: 360rpx;
+    padding: 20rpx 40rpx;
+  }
+
+  .current-item-text {
+    font-size: 36rpx;
+  }
+
+  .wheel {
+    max-width: 115%;
+    width: 660rpx;
+    height: 660rpx;
+  }
+}
+
+@media screen and (min-width: 769rpx) {
+  .set-select-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .set-select {
+    flex: 0 0 auto;
+  }
+
+  .wheel-container {
+    min-height: 1000rpx;
+    padding: 56rpx;
+    gap: 40rpx;
+    justify-content: center;
+  }
+
+  .wheel {
+    max-width: 100%;
+    width: 1040rpx;
+    height: 1040rpx;
+  }
+}
+
+@media screen and (min-width: 1024rpx) {
+  .main {
+    padding: 48rpx 32rpx 32rpx;
+  }
+
+  .wheel-container {
+    min-height: 1120rpx;
+    padding: 64rpx;
+    gap: 40rpx;
+    justify-content: center;
+  }
+
+  .wheel {
+    max-width: 100%;
+    width: 1160rpx;
+    height: 1160rpx;
+  }
+}

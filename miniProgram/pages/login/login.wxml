@@ -1,0 +1,126 @@
+<!--login.wxml-->
+<view class="container">
+  <view class="login-content">
+    <!-- Logo区域 -->
+    <view class="logo-section">
+      <view class="logo">🎯</view>
+      <text class="app-name">转盘抽取</text>
+      <text class="app-desc">让选择变得有趣</text>
+    </view>
+
+    <!-- 登录卡片 -->
+    <view class="login-card">
+      <view class="card-header">
+        <text class="card-title">欢迎使用</text>
+        <text class="card-subtitle">授权登录后可同步您的数据</text>
+      </view>
+
+      <view class="card-body">
+        <!-- 微信授权登录 -->
+        <button 
+          class="btn btn-primary login-btn"
+          open-type="getUserProfile"
+          bind:getuserprofile="onGetUserProfile"
+          wx:if="{{!userInfo.nickName}}"
+        >
+          <text class="btn-icon">👤</text>
+          <text>微信授权登录</text>
+        </button>
+
+        <!-- 已登录状态 -->
+        <view class="user-info" wx:else>
+          <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+          <view class="user-details">
+            <text class="user-name">{{userInfo.nickName}}</text>
+            <text class="user-status">已授权登录</text>
+          </view>
+        </view>
+
+        <!-- 功能说明 -->
+        <view class="features">
+          <view class="feature-item">
+            <view class="feature-icon">☁️</view>
+            <view class="feature-text">
+              <text class="feature-title">云端同步</text>
+              <text class="feature-desc">数据安全存储，多端同步</text>
+            </view>
+          </view>
+          <view class="feature-item">
+            <view class="feature-icon">🎨</view>
+            <view class="feature-text">
+              <text class="feature-title">个性定制</text>
+              <text class="feature-desc">自定义转盘样式和选项</text>
+            </view>
+          </view>
+          <view class="feature-item">
+            <view class="feature-icon">📊</view>
+            <view class="feature-text">
+              <text class="feature-title">数据统计</text>
+              <text class="feature-desc">记录使用历史和偏好</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-buttons">
+          <button 
+            class="btn btn-secondary"
+            bindtap="skipLogin"
+          >
+            跳过登录
+          </button>
+          <button 
+            class="btn btn-primary"
+            bindtap="goToHome"
+            wx:if="{{userInfo.nickName}}"
+          >
+            开始使用
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 隐私说明 -->
+    <view class="privacy-notice">
+      <text class="privacy-text">
+        登录即表示您同意我们的
+        <text class="privacy-link" bindtap="showPrivacyPolicy">《隐私政策》</text>
+        和
+        <text class="privacy-link" bindtap="showUserAgreement">《用户协议》</text>
+      </text>
+    </view>
+  </view>
+
+  <!-- 隐私政策弹窗 -->
+  <view class="modal {{showPrivacyModal ? 'show' : ''}}" bindtap="hidePrivacyModal">
+    <view class="modal-content" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">隐私政策</text>
+        <button class="modal-close" bindtap="hidePrivacyModal">×</button>
+      </view>
+      <view class="modal-body">
+        <scroll-view scroll-y class="policy-content">
+          <text class="policy-text">
+            1. 信息收集
+            我们仅收集您主动提供的信息，包括昵称、头像等基本信息。
+
+            2. 信息使用
+            收集的信息仅用于提供更好的服务体验，不会用于其他商业目的。
+
+            3. 信息保护
+            我们采用安全措施保护您的个人信息，不会向第三方泄露。
+
+            4. 信息删除
+            您可以随时要求删除个人信息，我们将及时处理。
+
+            5. 联系我们
+            如有疑问，请通过小程序内反馈功能联系我们。
+          </text>
+        </scroll-view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn btn-primary" bindtap="hidePrivacyModal">知道了</button>
+      </view>
+    </view>
+  </view>
+</view>

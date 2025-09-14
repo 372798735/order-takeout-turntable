@@ -1,0 +1,67 @@
+# 微信小程序 .gitignore
+
+# 微信开发者工具生成的文件
+.DS_Store
+.vscode/
+.idea/
+
+# 小程序运行时生成的文件
+miniprogram_npm/
+node_modules/
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 依赖目录
+node_modules/
+jspm_packages/
+
+# 构建输出
+dist/
+build/
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 临时文件
+*.tmp
+*.temp
+.cache/
+
+# 系统文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 小程序特定
+# 如果不想提交项目配置，可以忽略以下文件
+# project.config.json
+# project.private.config.json
+
+# 如果不想提交sit map，可以忽略
+# sitemap.json

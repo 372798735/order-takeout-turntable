@@ -1,0 +1,90 @@
+<!--detail.wxml-->
+<view class="container">
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="detail-content" wx:elif="{{item}}">
+    <!-- 选项信息卡片 -->
+    <view class="card">
+      <view class="card-header">
+        <text>选项详情</text>
+      </view>
+      <view class="card-body">
+        <view class="item-header">
+          <view class="item-color" style="background-color: {{item.color || '#f0f0f0'}}"></view>
+          <view class="item-title">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-set">来自：{{setName}}</text>
+          </view>
+        </view>
+
+        <view class="item-description" wx:if="{{item.description}}">
+          <view class="desc-title">备注说明</view>
+          <view class="desc-content">{{item.description}}</view>
+        </view>
+
+        <view class="item-meta">
+          <view class="meta-row">
+            <text class="meta-label">颜色代码：</text>
+            <text class="meta-value">{{item.color || '默认'}}</text>
+          </view>
+          <view class="meta-row" wx:if="{{item.createdAt}}">
+            <text class="meta-label">创建时间：</text>
+            <text class="meta-value">{{formatTime(item.createdAt)}}</text>
+          </view>
+          <view class="meta-row" wx:if="{{item.updatedAt}}">
+            <text class="meta-label">最后更新：</text>
+            <text class="meta-value">{{formatTime(item.updatedAt)}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="card">
+      <view class="card-header">
+        <text>操作</text>
+      </view>
+      <view class="card-body">
+        <view class="action-buttons">
+          <button class="btn btn-primary action-btn" bindtap="goToManagement">
+            <text class="btn-icon">✏️</text>
+            <text>编辑此套餐</text>
+          </button>
+          <button class="btn btn-secondary action-btn" bindtap="goToHome">
+            <text class="btn-icon">🎯</text>
+            <text>开始转盘</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 相关选项 -->
+    <view class="card" wx:if="{{relatedItems.length > 0}}">
+      <view class="card-header">
+        <text>同套餐其他选项</text>
+      </view>
+      <view class="card-body">
+        <view class="related-list">
+          <view 
+            class="related-item"
+            wx:for="{{relatedItems}}"
+            wx:key="id"
+            bindtap="viewRelatedItem"
+            data-id="{{item.id}}"
+          >
+            <view class="related-color" style="background-color: {{item.color || '#f0f0f0'}}"></view>
+            <text class="related-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="error" wx:else>
+    <view class="error-icon">😵</view>
+    <view class="error-text">未找到该选项</view>
+    <button class="btn btn-primary" bindtap="goBack">返回</button>
+  </view>
+</view>

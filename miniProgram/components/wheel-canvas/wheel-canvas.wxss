@@ -1,0 +1,376 @@
+/* components/wheel-canvas/wheel-canvas.wxss */
+.wheel-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 580rpx;
+  height: 100%;
+  max-height: 580rpx;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 转盘Canvas */
+.wheel-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: 0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+  display: block;
+}
+
+.wheel-canvas.spinning {
+  box-shadow: 0 32rpx 64rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 粒子特效Canvas */
+.particle-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+  border-radius: 50%;
+}
+
+/* 指针 */
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* 三角形指针 */
+.pointer-triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 32rpx 48rpx 32rpx;
+  border-color: transparent transparent #6750a4 transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -80rpx);
+  transition: all 0.6s ease;
+  box-shadow: 0 8rpx 8rpx rgba(0, 0, 0, 0.25);
+}
+
+.glow .pointer-triangle {
+  box-shadow:
+    0 0 20rpx rgba(103, 80, 164, 0.6),
+    0 8rpx 8rpx rgba(0, 0, 0, 0.25);
+}
+
+.pointer-active .pointer-triangle {
+  box-shadow:
+    0 0 40rpx rgba(103, 80, 164, 0.8),
+    0 0 60rpx rgba(103, 80, 164, 0.6),
+    0 8rpx 8rpx rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -80rpx) scale(1.1);
+}
+
+/* 中心GO按钮 */
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160rpx;
+  height: 160rpx;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 30;
+}
+
+/* GO按钮 */
+.hub-button {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff 0%, #c9b7ff 70%, #7a5ce6 100%);
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.18);
+  transition: all 0.6s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 24rpx;
+  color: #333;
+  line-height: 1;
+  z-index: 2;
+}
+
+/* 外圈环 */
+.hub-ring {
+  position: absolute;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 6rpx solid rgba(103, 80, 164, 0.25);
+  transition: all 0.6s ease;
+  z-index: 1;
+}
+
+.hub.breathing .hub-ring {
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.hub.breathing .hub-button {
+  animation: pulse 0.8s ease-in-out infinite;
+  box-shadow:
+    0 12rpx 24rpx rgba(0, 0, 0, 0.18),
+    0 0 40rpx rgba(103, 80, 164, 0.4);
+}
+
+/* 特效层 */
+.effects-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.effects-layer.active {
+  opacity: 1;
+}
+
+/* 脉冲环 */
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20%;
+  height: 20%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 0 rgba(103, 80, 164, 0.25),
+    0 0 0 0 rgba(103, 80, 164, 0.15),
+    0 0 0 0 rgba(103, 80, 164, 0.1);
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+
+/* 闪光效果 */
+.sparkles {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.sparkle {
+  position: absolute;
+  width: 12rpx;
+  height: 12rpx;
+  background: #ffd700;
+  border-radius: 50%;
+  animation: sparkle 2s ease-in-out infinite;
+  box-shadow: 0 0 16rpx rgba(255, 215, 0, 0.8);
+}
+
+.sparkle:nth-child(1) {
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sparkle:nth-child(2) {
+  top: 20%;
+  right: 20%;
+}
+.sparkle:nth-child(3) {
+  top: 50%;
+  right: 10%;
+}
+.sparkle:nth-child(4) {
+  bottom: 20%;
+  right: 20%;
+}
+.sparkle:nth-child(5) {
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sparkle:nth-child(6) {
+  bottom: 20%;
+  left: 20%;
+}
+.sparkle:nth-child(7) {
+  top: 50%;
+  left: 10%;
+}
+.sparkle:nth-child(8) {
+  top: 20%;
+  left: 20%;
+}
+.sparkle:nth-child(9) {
+  top: 30%;
+  right: 30%;
+}
+.sparkle:nth-child(10) {
+  bottom: 30%;
+  right: 30%;
+}
+.sparkle:nth-child(11) {
+  bottom: 30%;
+  left: 30%;
+}
+.sparkle:nth-child(12) {
+  top: 30%;
+  left: 30%;
+}
+
+.sparkle:nth-child(odd) {
+  background: #ff6b6b;
+  box-shadow: 0 0 16rpx rgba(255, 107, 107, 0.8);
+}
+
+.sparkle:nth-child(3n) {
+  background: #4ecdc4;
+  box-shadow: 0 0 16rpx rgba(78, 205, 196, 0.8);
+}
+
+/* 光线效果 */
+.light-rays {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.ray {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 6rpx;
+  height: 58%;
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgba(255, 215, 0, 0.6),
+    rgba(255, 215, 0, 0.8),
+    rgba(255, 215, 0, 0.6),
+    transparent
+  );
+  transform-origin: center bottom;
+  transform: translate(-50%, 0) rotate(var(--angle));
+  animation: ray 4s ease-in-out infinite;
+  border-radius: 4rpx;
+  box-shadow: 0 0 20rpx rgba(255, 215, 0, 0.4);
+}
+
+/* 动画定义 */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(103, 80, 164, 0.35),
+      0 0 0 0 rgba(103, 80, 164, 0.2),
+      0 0 0 0 rgba(103, 80, 164, 0.1);
+  }
+  70% {
+    box-shadow:
+      0 0 0 36rpx rgba(103, 80, 164, 0),
+      0 0 0 72rpx rgba(103, 80, 164, 0.06),
+      0 0 0 108rpx rgba(103, 80, 164, 0.02);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(103, 80, 164, 0),
+      0 0 0 0 rgba(103, 80, 164, 0),
+      0 0 0 0 rgba(103, 80, 164, 0);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+@keyframes ray {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0) rotate(var(--angle)) scaleY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(var(--angle)) scaleY(1.1);
+  }
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 768rpx) {
+  .wheel-wrap {
+    max-width: 450rpx;
+    max-height: 450rpx;
+  }
+
+  .sparkle {
+    width: 8rpx;
+    height: 8rpx;
+  }
+
+  .ray {
+    width: 4rpx;
+    height: 54%;
+  }
+}
+
+@media screen and (max-width: 480rpx) {
+  .wheel-wrap {
+    max-width: 380rpx;
+    max-height: 380rpx;
+  }
+
+  .sparkle {
+    width: 6rpx;
+    height: 6rpx;
+  }
+
+  .ray {
+    width: 2rpx;
+    height: 50%;
+  }
+}

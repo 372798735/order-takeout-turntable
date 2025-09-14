@@ -1,0 +1,45 @@
+<!-- 转盘组件 -->
+<view class="wheel-wrap">
+  <!-- 主Canvas转盘 -->
+  <canvas 
+    canvas-id="wheelCanvas" 
+    class="wheel-canvas {{isSpinning ? 'spinning' : ''}}"
+    bindtouchstart="onTouchStart"
+    bindtouchend="onTouchEnd"
+    style="width: {{canvasSize}}rpx; height: {{canvasSize}}rpx;"
+  ></canvas>
+  
+  <!-- 粒子特效Canvas -->
+  <canvas 
+    canvas-id="particleCanvas" 
+    class="particle-canvas"
+    style="width: {{canvasSize}}rpx; height: {{canvasSize}}rpx;"
+  ></canvas>
+  
+  <!-- 指针 -->
+  <view class="pointer glow {{isSpinning ? 'pointer-active' : ''}}">
+    <view class="pointer-triangle"></view>
+  </view>
+  
+  <!-- 中心GO按钮 -->
+  <view class="hub {{isSpinning ? 'breathing' : ''}}" bindtap="onHubClick">
+    <view class="hub-button">GO</view>
+    <view class="hub-ring"></view>
+  </view>
+  
+  <!-- 特效层 -->
+  <view class="effects-layer {{isSpinning ? 'active' : ''}}">
+    <!-- 中心脉冲环 -->
+    <view class="pulse-ring"></view>
+    
+    <!-- 闪光效果 -->
+    <view class="sparkles">
+      <view class="sparkle" wx:for="{{12}}" wx:key="index" style="animation-delay: {{item * 0.1}}s;"></view>
+    </view>
+    
+    <!-- 光线效果 -->
+    <view class="light-rays">
+      <view class="ray" wx:for="{{8}}" wx:key="index" style="--angle: {{item * 45}}deg; animation-delay: {{item * 0.2}}s;"></view>
+    </view>
+  </view>
+</view>

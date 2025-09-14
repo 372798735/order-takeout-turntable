@@ -1,0 +1,89 @@
+<!--index.wxml-->
+<view class="page">
+  <!-- 主内容区域 -->
+  <view class="main">
+    <!-- 转盘卡片 -->
+    <view class="wheel-card card">
+      <view class="card-header">
+        <view class="set-select-container">
+          <view class="set-select">
+            <text class="set-label">当前转盘：</text>
+            <picker 
+              bindchange="onSetChange" 
+              value="{{currentSetIndex}}" 
+              range="{{wheelSetNames}}"
+              class="set-dropdown"
+            >
+              <view class="picker-display">
+                {{currentSetName || '请选择转盘'}}
+                <text class="picker-arrow">▼</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+      </view>
+
+      <view class="card-body">
+        <view class="wheel-container fade-up">
+          <!-- 实时文案显示 -->
+          <view class="realtime-text {{isSpinning ? 'active' : ''}}">
+            <text class="text-content">{{realtimeText}}</text>
+          </view>
+          
+          <!-- 当前指向的项目显示 -->
+          <view 
+            class="current-item-display {{isSpinning ? 'spinning-mode' : (lastResult ? 'result-mode' : '')}}"
+          >
+            <text class="current-item-text">{{currentItemText}}</text>
+          </view>
+          
+          <!-- 转盘组件 -->
+          <wheel-canvas 
+            class="wheel"
+            items="{{currentItems}}"
+            size="{{wheelSize}}"
+            bind:item-click="onItemClick"
+            bind:hub-click="onSpin"
+            bind:end="onSpinEnd"
+            bind:current-change="onCurrentChange"
+            id="wheelCanvas"
+          ></wheel-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 状态信息卡片 -->
+    <view class="status-card card">
+      <view class="card-header">
+        <text>提示与状态</text>
+      </view>
+      <view class="card-body">
+        <view class="status-list">
+          <view class="status-item">
+            <text class="status-label">选项数量</text>
+            <text class="status-value">{{currentItems.length}}</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">是否旋转中</text>
+            <text class="status-value">{{isSpinning ? '是' : '否'}}</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">上次结果</text>
+            <text class="status-value">{{lastResult ? lastResult.name : '—'}}</text>
+          </view>
+        </view>
+        
+        <view class="divider"></view>
+        
+        <view class="tips">
+          <view class="tip-title">💡 小提示</view>
+          <view class="tip-content">
+            <text>使用管理页可添加/排序选项，建议保持 6~12 个扇区获得更佳视觉与节奏。</text>
+            <text>💡 点击转盘上的任意选项可查看详情信息！</text>
+            <text>🎯 点击中心的GO按钮开始转盘抽取！</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

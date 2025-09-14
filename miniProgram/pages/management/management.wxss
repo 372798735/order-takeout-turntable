@@ -1,0 +1,372 @@
+/**management.wxss**/
+.container {
+  padding: 20rpx;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  box-sizing: border-box;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.section {
+  margin-bottom: 30rpx;
+}
+
+/* 按钮样式 */
+.btn-sm {
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  height: auto;
+  line-height: 1.2;
+}
+
+.btn-danger {
+  background: #ff4757;
+  color: white;
+}
+
+.btn-danger:active {
+  background: #ff3838;
+}
+
+/* 套餐列表 */
+.set-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.set-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25rpx;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+.set-item.active {
+  background: rgba(103, 80, 164, 0.1);
+  border-color: #6750a4;
+}
+
+.set-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.set-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.set-count {
+  font-size: 24rpx;
+  color: #666;
+  white-space: nowrap;
+}
+
+.set-actions {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+/* 选项列表 */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.item-color {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.item-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-description {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-actions {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+/* 弹窗样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 24rpx;
+  margin: 0 40rpx;
+  width: calc(100% - 80rpx);
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 36rpx;
+  line-height: 1;
+  padding: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 30rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+  padding: 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.modal-footer .btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 28rpx;
+}
+
+/* 表单样式 */
+.form-group {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+
+.textarea {
+  min-height: 120rpx;
+  resize: none;
+}
+
+/* 颜色选择器 */
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.color-option {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 4rpx solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-option.selected {
+  border-color: #6750a4;
+  transform: scale(1.1);
+}
+
+/* 响应式适配 */
+@media (max-width: 750rpx) {
+  .container {
+    padding: 15rpx;
+  }
+
+  .set-item,
+  .item-row {
+    padding: 20rpx;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15rpx;
+  }
+
+  .set-info,
+  .item-info {
+    width: 100%;
+  }
+
+  .set-actions,
+  .item-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 10rpx;
+  }
+
+  .set-actions .btn,
+  .item-actions .btn {
+    min-width: 80rpx;
+    font-size: 22rpx;
+    padding: 10rpx 16rpx;
+  }
+
+  .modal-content {
+    margin: 0 20rpx;
+    width: calc(100% - 40rpx);
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 25rpx;
+  }
+
+  .modal-title {
+    font-size: 28rpx;
+  }
+
+  .form-label {
+    font-size: 26rpx;
+  }
+
+  .color-option {
+    width: 50rpx;
+    height: 50rpx;
+  }
+
+  .color-picker {
+    gap: 15rpx;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 600rpx) {
+  .container {
+    padding: 10rpx;
+  }
+
+  .set-item,
+  .item-row {
+    padding: 15rpx;
+  }
+
+  .set-name {
+    font-size: 28rpx;
+  }
+
+  .item-name {
+    font-size: 26rpx;
+  }
+
+  .item-description {
+    font-size: 22rpx;
+  }
+
+  .btn-sm {
+    padding: 8rpx 12rpx;
+    font-size: 22rpx;
+  }
+}
