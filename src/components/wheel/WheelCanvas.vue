@@ -460,21 +460,38 @@ function handleCanvasClick(event: MouseEvent) {
   if (distance > radius - 10) return;
 
   // 点击在转盘内容区域时打开详情而不是旋转转盘
-  // 计算点击的角度（相对于12点钟方向）
-  let angle = Math.atan2(dy, dx);
-  // 转换为从12点钟开始的角度
-  angle = angle + Math.PI / 2;
-  if (angle < 0) angle += 2 * Math.PI;
-
-  // 考虑当前旋转角度，计算实际的扇形索引
+  // 直接使用与绘制逻辑一致的角度计算
   const items = props.items;
   if (items.length === 0) return;
 
-  const sectorAngle = (2 * Math.PI) / items.length;
-  // 根据当前旋转角度调整角度计算
-  const adjustedAngle = (angle - currentRotation + 2 * Math.PI) % (2 * Math.PI);
-  const clickedIndex = Math.floor(adjustedAngle / sectorAngle) % items.length;
+  const count = items.length;
+  const anglePer = (2 * Math.PI) / count;
+
+  // 计算点击角度（相对于3点钟方向，与canvas绘制保持一致）
+  let clickAngle = Math.atan2(dy, dx);
+  // 确保角度为正值
+  if (clickAngle < 0) clickAngle += 2 * Math.PI;
+
+  // 减去当前旋转角度，得到相对于初始状态的角度
+  let adjustedAngle = clickAngle - currentRotation;
+  // 确保角度在0-2π范围内
+  adjustedAngle = ((adjustedAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
+  // 计算对应的扇形索引（与绘制时的索引计算一致）
+  const clickedIndex = Math.floor(adjustedAngle / anglePer) % count;
   const item = items[clickedIndex];
+
+  // 调试信息
+  console.log('点击调试信息:', {
+    clickPosition: { x: canvasX, y: canvasY },
+    clickAngle: (clickAngle * 180) / Math.PI,
+    currentRotation: (currentRotation * 180) / Math.PI,
+    adjustedAngle: (adjustedAngle * 180) / Math.PI,
+    anglePer: (anglePer * 180) / Math.PI,
+    clickedIndex,
+    itemName: item?.name,
+    totalItems: count,
+  });
 
   if (item) {
     emit('item-click', item);
@@ -603,7 +620,11 @@ canvas.spinning {
 /* 中心同心环（纯样式覆盖 Canvas 中心） */
 .hub {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   pointer-events: auto; /* 允许点击 */

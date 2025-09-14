@@ -542,9 +542,10 @@ watch(
   }
 
   .wheel {
-    max-width: 110%;
-    width: 380px; /* 小屏幕设备也适当增大 */
-    height: 380px;
+    max-width: 115%;
+    width: 330px;
+    height: 330px;
+    right: 14px;
   }
 }
 
