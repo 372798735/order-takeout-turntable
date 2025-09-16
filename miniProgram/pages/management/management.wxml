@@ -25,21 +25,18 @@
             </view>
             <view class="set-actions">
               <button 
-                class="btn btn-secondary btn-sm" 
+                class="btn btn-secondary btn-xs" 
                 bindtap="editSet" 
                 data-id="{{item.id}}"
                 data-index="{{index}}"
-                catchtap=""
               >
                 编辑
               </button>
               <button 
-                class="btn btn-danger btn-sm" 
+                class="btn btn-danger btn-xs" 
                 bindtap="deleteSet" 
                 data-id="{{item.id}}"
                 data-index="{{index}}"
-                catchtap=""
-                wx:if="{{wheelSets.length > 1}}"
               >
                 删除
               </button>
@@ -64,7 +61,7 @@
         </button>
       </view>
       <view class="card-body">
-        <view class="item-list" wx:if="{{currentSet.items.length > 0}}">
+        <view class="item-list" wx:if="{{currentSet && currentSet.items && currentSet.items.length > 0}}">
           <view 
             class="item-row"
             wx:for="{{currentSet.items}}"
@@ -79,7 +76,7 @@
             </view>
             <view class="item-actions">
               <button 
-                class="btn btn-secondary btn-sm" 
+                class="btn btn-secondary btn-xs" 
                 bindtap="editItem" 
                 data-id="{{item.id}}"
                 data-index="{{index}}"
@@ -87,7 +84,7 @@
                 编辑
               </button>
               <button 
-                class="btn btn-danger btn-sm" 
+                class="btn btn-danger btn-xs" 
                 bindtap="deleteItem" 
                 data-id="{{item.id}}"
                 data-index="{{index}}"
@@ -97,9 +94,13 @@
             </view>
           </view>
         </view>
-        <view class="empty" wx:else>
+        <view class="empty" wx:elif="{{currentSet && (!currentSet.items || currentSet.items.length === 0)}}">
           <view class="empty-icon">🎯</view>
           <view class="empty-text">这个套餐还没有选项，点击上方按钮添加一些吧！</view>
+        </view>
+        <view class="empty" wx:else>
+          <view class="empty-icon">📝</view>
+          <view class="empty-text">请先选择一个套餐</view>
         </view>
       </view>
     </view>
@@ -107,10 +108,10 @@
 
   <!-- 添加/编辑套餐弹窗 -->
   <view class="modal {{showSetModal ? 'show' : ''}}" bindtap="hideSetModal">
-    <view class="modal-content" catchtap="">
+    <view class="modal-content" catchtap="preventClose">
       <view class="modal-header">
-        <text class="modal-title">{{editingSet ? '编辑套餐' : '新建套餐'}}</text>
-        <button class="modal-close" bindtap="hideSetModal">×</button>
+        <text class="modal-title">{{editingSet ? '编辑套餐：' + editingSet.name : '新建套餐'}}</text>
+        <button class="modal-close" bindtap="hideSetModal">✕</button>
       </view>
       <view class="modal-body">
         <view class="form-group">
@@ -133,10 +134,10 @@
 
   <!-- 添加/编辑选项弹窗 -->
   <view class="modal {{showItemModal ? 'show' : ''}}" bindtap="hideItemModal">
-    <view class="modal-content" catchtap="">
+    <view class="modal-content" catchtap="preventClose">
       <view class="modal-header">
-        <text class="modal-title">{{editingItem ? '编辑选项' : '添加选项'}}</text>
-        <button class="modal-close" bindtap="hideItemModal">×</button>
+        <text class="modal-title">{{editingItem ? '编辑选项：' + editingItem.name : '添加选项'}}</text>
+        <button class="modal-close" bindtap="hideItemModal">✕</button>
       </view>
       <view class="modal-body">
         <view class="form-group">
@@ -177,6 +178,32 @@
       <view class="modal-footer">
         <button class="btn btn-secondary" bindtap="hideItemModal">取消</button>
         <button class="btn btn-primary" bindtap="saveItem">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 存储管理 -->
+  <view class="section">
+    <view class="card">
+      <view class="card-header">
+        <text>存储管理</text>
+      </view>
+      <view class="card-body">
+        <view class="storage-info" wx:if="{{storageInfo}}">
+          <view class="storage-item">
+            <text class="storage-label">存储使用率</text>
+            <text class="storage-value">{{storageInfo.usage}}</text>
+          </view>
+          <view class="storage-item">
+            <text class="storage-label">已用空间</text>
+            <text class="storage-value">{{storageInfo.currentSize}}KB</text>
+          </view>
+          <view class="storage-item">
+            <text class="storage-label">总空间</text>
+            <text class="storage-value">{{storageInfo.limitSize}}KB</text>
+          </view>
+        </view>
+        
       </view>
     </view>
   </view>

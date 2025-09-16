@@ -110,6 +110,11 @@ Page({
     });
   },
 
+  // 阻止弹窗关闭
+  preventClose() {
+    // 空函数，用于阻止事件冒泡
+  },
+
   // 保存昵称
   saveNickname() {
     const nickname = this.data.nicknameForm.trim();

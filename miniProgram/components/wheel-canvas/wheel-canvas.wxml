@@ -23,7 +23,9 @@
   
   <!-- 中心GO按钮 -->
   <view class="hub {{isSpinning ? 'breathing' : ''}}" bindtap="onHubClick">
-    <view class="hub-button">GO</view>
+    <view class="hub-button">
+      <image class="center-image" src="/images/center.png" mode="aspectFit"></image>
+    </view>
     <view class="hub-ring"></view>
   </view>
   

@@ -246,6 +246,7 @@
   overflow: hidden;
   transform: scale(0.9);
   transition: transform 0.3s ease;
+  padding-bottom: 20px;
 }
 
 .modal.show .modal-content {

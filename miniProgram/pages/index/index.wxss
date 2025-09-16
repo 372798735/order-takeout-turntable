@@ -14,6 +14,10 @@
 /* 转盘卡片 */
 .wheel-card {
   margin-bottom: 24rpx;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
 }
 
 .wheel-card .card-body {
@@ -21,6 +25,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: transparent !important;
 }
 
 /* 套餐选择容器 */
@@ -80,35 +85,59 @@
   gap: 32rpx;
   width: 100%;
   margin: 0 auto;
+  background: transparent;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
 }
 
 /* 实时文案显示 */
 .realtime-text {
   position: absolute;
-  top: 20rpx;
+  top: -13rpx;
   left: 50%;
-  transform: translateX(-50%);
+  transform:translateX(-50%);
+  right: 0;
   z-index: 30;
   opacity: 0.8;
   transition: all 0.3s ease;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .realtime-text.active {
+  left: 50%;
+  transform:translateX(-50%);
   opacity: 1;
   animation: textPulse 2s infinite;
+  background: red !important;
+  box-shadow: none;
 }
 
 .text-content {
   display: inline-block;
   padding: 16rpx 32rpx;
-  background: linear-gradient(135deg, #6750a4, #8b5cf6);
-  color: white;
+  background: linear-gradient(135deg, #6750a4, #8b5cf6) !important;
+  color: white !important;
   border-radius: 50rpx;
   font-size: 32rpx;
   font-weight: 700;
   text-align: center;
   box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4);
   white-space: nowrap;
+  border: none !important;
+  outline: none !important;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  width: auto;
+  min-width: auto;
+  flex-shrink: 0;
 }
 
 .wheel {
@@ -260,11 +289,11 @@
 @keyframes textPulse {
   0%,
   100% {
-    transform: translateX(-50%) scale(1);
+    transform: scale(1);
     box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4);
   }
   50% {
-    transform: translateX(-50%) scale(1.08);
+    transform: scale(1.05);
     box-shadow: 0 12rpx 32rpx rgba(103, 80, 164, 0.6);
   }
 }
@@ -305,6 +334,15 @@
     font-size: 32rpx;
   }
 
+  .realtime-text {
+    top: 15rpx;
+  }
+
+  .text-content {
+    font-size: 28rpx;
+    padding: 12rpx 24rpx;
+  }
+
   .wheel {
     max-width: 95%;
     width: 840rpx;
@@ -335,6 +373,15 @@
 
   .current-item-text {
     font-size: 36rpx;
+  }
+
+  .realtime-text {
+    top: 10rpx;
+  }
+
+  .text-content {
+    font-size: 30rpx;
+    padding: 14rpx 28rpx;
   }
 
   .wheel {
@@ -379,6 +426,15 @@
     padding: 64rpx;
     gap: 40rpx;
     justify-content: center;
+  }
+
+  .realtime-text {
+    top: 5rpx;
+  }
+
+  .text-content {
+    font-size: 36rpx;
+    padding: 20rpx 40rpx;
   }
 
   .wheel {

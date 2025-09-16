@@ -10,6 +10,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 /* 转盘Canvas */
@@ -24,6 +27,9 @@
     transform 0.4s ease,
     box-shadow 0.4s ease;
   display: block;
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 .wheel-canvas.spinning {
@@ -39,6 +45,9 @@
   pointer-events: none;
   z-index: 10;
   border-radius: 50%;
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 /* 指针 */
@@ -54,31 +63,26 @@
 
 /* 三角形指针 */
 .pointer-triangle {
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 32rpx 48rpx 32rpx;
-  border-color: transparent transparent #6750a4 transparent;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -80rpx);
-  transition: all 0.6s ease;
-  box-shadow: 0 8rpx 8rpx rgba(0, 0, 0, 0.25);
+  margin-left: -24rpx;
+  margin-top: -80rpx;
+  width: 0;
+  height: 0;
+  border-left: 24rpx solid transparent;
+  border-right: 24rpx solid transparent;
+  border-bottom: 36rpx solid #6750a4;
 }
 
 .glow .pointer-triangle {
-  box-shadow:
-    0 0 20rpx rgba(103, 80, 164, 0.6),
-    0 8rpx 8rpx rgba(0, 0, 0, 0.25);
+  border-bottom-color: #7c5ce8;
 }
 
 .pointer-active .pointer-triangle {
-  box-shadow:
-    0 0 40rpx rgba(103, 80, 164, 0.8),
-    0 0 60rpx rgba(103, 80, 164, 0.6),
-    0 8rpx 8rpx rgba(0, 0, 0, 0.25);
-  transform: translate(-50%, -80rpx) scale(1.1);
+  border-bottom-color: #8b5cf6;
+  margin-left: -24rpx;
+  margin-top: -88rpx;
 }
 
 /* 中心GO按钮 */
@@ -88,40 +92,42 @@
   left: 50%;
   width: 160rpx;
   height: 160rpx;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-left: -80rpx;
+  margin-top: -80rpx;
   pointer-events: auto;
   z-index: 30;
 }
 
 /* GO按钮 */
 .hub-button {
+  position: absolute;
+  top: 40rpx;
+  left: 40rpx;
   width: 80rpx;
   height: 80rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fff 0%, #c9b7ff 70%, #7a5ce6 100%);
-  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.18);
-  transition: all 0.6s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 24rpx;
-  color: #333;
-  line-height: 1;
+  border-radius: 40rpx;
+  background-color: transparent;
   z-index: 2;
+}
+
+/* 中心图片 */
+.center-image {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: block;
 }
 
 /* 外圈环 */
 .hub-ring {
   position: absolute;
+  top: 20rpx;
+  left: 20rpx;
   width: 120rpx;
   height: 120rpx;
-  border-radius: 50%;
+  border-radius: 60rpx;
   border: 6rpx solid rgba(103, 80, 164, 0.25);
-  transition: all 0.6s ease;
+  box-sizing: border-box;
   z-index: 1;
 }
 
@@ -130,16 +136,16 @@
 }
 
 .hub.breathing .hub-button {
-  animation: pulse 0.8s ease-in-out infinite;
-  box-shadow:
-    0 12rpx 24rpx rgba(0, 0, 0, 0.18),
-    0 0 40rpx rgba(103, 80, 164, 0.4);
+  opacity: 0.9;
 }
 
 /* 特效层 */
 .effects-layer {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
   z-index: 5;
   opacity: 0;
@@ -169,7 +175,10 @@
 /* 闪光效果 */
 .sparkles {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 50%;
 }
 
@@ -247,7 +256,10 @@
 /* 光线效果 */
 .light-rays {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 50%;
 }
 

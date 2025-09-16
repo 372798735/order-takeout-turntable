@@ -148,7 +148,7 @@ Page({
       isSpinning: false,
       lastResult: result,
       showResult: true,
-      realtimeText: `恭喜！结果是: ${result.name}`,
+      realtimeText: `${result.name}`,
     });
 
     // 更新全局数据
@@ -181,12 +181,12 @@ Page({
     if (item && item.name && !this.data.isSpinning) {
       this.setData({
         currentItemText: item.name,
-        realtimeText: `结果: ${item.name}`,
+        realtimeText: `${item.name}`,
       });
     } else if (this.data.isSpinning && item && item.name) {
       this.setData({
         currentItemText: '??',
-        realtimeText: `正在转向: ${item.name}`,
+        realtimeText: `${item.name}`,
       });
     } else {
       this.setData({

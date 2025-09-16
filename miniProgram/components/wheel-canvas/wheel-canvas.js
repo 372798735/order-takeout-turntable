@@ -170,6 +170,9 @@ Component({
 
       ctx.clearRect(0, 0, size, size);
 
+      // 确保Canvas背景透明
+      ctx.globalCompositeOperation = 'source-over';
+
       // 外圈阴影渐变（兼容性处理）
       let gradient = null;
       if (ctx.createRadialGradient) {
@@ -212,6 +215,9 @@ Component({
         ctx.textAlign = 'right';
         ctx.fillStyle = '#333';
         ctx.textBaseline = 'middle';
+
+        // 确保文字背景透明
+        ctx.globalCompositeOperation = 'source-over';
 
         // 使用固定字体大小进行测试
         const fontSize = 16;
@@ -347,6 +353,9 @@ Component({
       const size = this.data.actualCanvasSize || 300;
 
       ctx.clearRect(0, 0, size, size);
+
+      // 确保粒子Canvas背景透明
+      ctx.globalCompositeOperation = 'source-over';
 
       this.data.particles.forEach((particle) => {
         const alpha = particle.life / particle.maxLife;

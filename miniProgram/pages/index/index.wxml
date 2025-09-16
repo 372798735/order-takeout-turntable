@@ -31,11 +31,11 @@
           </view>
           
           <!-- 当前指向的项目显示 -->
-          <view 
+          <!-- <view 
             class="current-item-display {{isSpinning ? 'spinning-mode' : (lastResult ? 'result-mode' : '')}}"
           >
             <text class="current-item-text">{{currentItemText}}</text>
-          </view>
+          </view> -->
           
           <!-- 转盘组件 -->
           <wheel-canvas 
