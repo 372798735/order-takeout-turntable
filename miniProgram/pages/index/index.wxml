@@ -52,6 +52,23 @@
       </view>
     </view>
 
+    <!-- 三角形指针（与转盘卡片同级） -->
+    <!-- <view class="external-pointer-container" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 50rpx; z-index: 100; width: 580rpx; height: 580rpx; pointer-events: none;">
+      <view class="pointer glow {{isSpinning ? 'pointer-active' : ''}}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <view class="pointer-triangle" style="position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-left: 24rpx solid transparent; border-right: 24rpx solid transparent; border-bottom: 36rpx solid #6750a4; transform: translate(-50%, -80rpx);"></view>
+      </view>
+    </view> -->
+    
+    <!-- 中心GO按钮（与转盘卡片同级） -->
+    <!-- <view class="external-hub-container" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 50rpx; z-index: 999; width: 80rpx; height: 80rpx; pointer-events: none;">
+      <view class="hub {{isSpinning ? 'breathing' : ''}}" bindtap="onSpin" catchtap="onSpin" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
+        <view class="hub-button" style="position: absolute; top: 0; left: 0; width: 80rpx; height: 80rpx; border-radius: 40rpx; background-color: transparent; z-index: 1000;">
+          <image class="center-image" src="/images/center.png" mode="aspectFit" lazy-load="{{false}}" show-menu-by-longpress="{{false}}" binderror="onImageError" style="width: 80rpx; height: 80rpx; border-radius: 40rpx; display: block; z-index: 1001;"></image>
+          <view class="center-fallback" wx:if="{{showFallback}}" style="position: absolute; top: 0; left: 0; width: 80rpx; height: 80rpx; border-radius: 40rpx; background: linear-gradient(135deg, #6750a4, #7c5ce8); color: white; font-size: 24rpx; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 1002;">GO</view>
+        </view>
+      </view>
+    </view> -->
+
     <!-- 状态信息卡片 -->
     <view class="status-card card">
       <view class="card-header">

@@ -21,6 +21,9 @@ Component({
     currentText: '点击GO开始',
     ctx: null,
     particleCtx: null,
+    showFallback: false,
+    winnerIndex: -1,
+    showWinnerHighlight: false,
     sectorColors: [
       '#EADDFF',
       '#FFD8E4',
@@ -61,9 +64,26 @@ Component({
         canvasSize: maxSize / rpxToPx, // 转换回rpx单位
       });
 
-      setTimeout(() => {
-        this.initCanvas();
-      }, 100);
+      // iOS特殊处理：检测iOS设备并进行特殊初始化
+      if (systemInfo.platform === 'ios') {
+        console.log('iOS device detected, applying iOS-specific fixes');
+        // iOS设备上预先显示备用按钮，防止图片加载问题
+        this.setData({
+          showFallback: true,
+        });
+        // iOS设备延迟更长，确保DOM完全渲染
+        setTimeout(() => {
+          this.initCanvas();
+          // 强制重绘一次确保所有元素显示
+          setTimeout(() => {
+            this.forceRedraw();
+          }, 200);
+        }, 200);
+      } else {
+        setTimeout(() => {
+          this.initCanvas();
+        }, 100);
+      }
     },
   },
 
@@ -190,38 +210,63 @@ Component({
       for (let i = 0; i < count; i++) {
         const start = i * anglePer;
         const end = start + anglePer;
+        const isWinner = this.data.showWinnerHighlight && i === this.data.winnerIndex;
 
         // 绘制扇形
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius - 16, start, end);
         ctx.closePath();
-        ctx.fillStyle =
+
+        let fillColor =
           items[i]?.color || this.data.sectorColors[i % this.data.sectorColors.length];
+
+        if (this.data.showWinnerHighlight) {
+          if (!isWinner) {
+            // 只让非选中区域变暗，选中区域保持原色
+            fillColor = this.darkenColor(fillColor);
+          }
+          // 选中区域保持原始颜色不变
+        }
+
+        ctx.fillStyle = fillColor;
         ctx.fill();
 
         // 扇形描边
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(255,255,255,.85)';
+        ctx.lineWidth = isWinner && this.data.showWinnerHighlight ? 4 : 2;
+        ctx.strokeStyle =
+          isWinner && this.data.showWinnerHighlight
+            ? 'rgba(255,255,255,.95)'
+            : 'rgba(255,255,255,.85)';
         ctx.stroke();
       }
 
       // 绘制所有文字（在扇形绘制完成后）
       for (let i = 0; i < count; i++) {
         const start = i * anglePer;
+        const isWinner = this.data.showWinnerHighlight && i === this.data.winnerIndex;
 
         ctx.save();
         ctx.rotate(start + anglePer / 2);
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#333';
         ctx.textBaseline = 'middle';
 
         // 确保文字背景透明
         ctx.globalCompositeOperation = 'source-over';
 
-        // 使用固定字体大小进行测试
-        const fontSize = 16;
-        ctx.font = `bold ${fontSize}px Arial`;
+        // 根据是否为获胜者调整文字样式
+        if (this.data.showWinnerHighlight) {
+          if (isWinner) {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = `bold 18px Arial`;
+          } else {
+            ctx.fillStyle = 'rgba(51,51,51,0.3)';
+            ctx.font = `bold 16px Arial`;
+          }
+        } else {
+          ctx.fillStyle = '#333';
+          ctx.font = `bold 16px Arial`;
+        }
 
         const label = items[i]?.name || `项目${i + 1}`;
         // 调整文字位置
@@ -246,6 +291,12 @@ Component({
       ctx.stroke();
 
       ctx.restore();
+
+      // 绘制三角形指针（在中心圆圈之前绘制，确保层级正确）
+      this.drawTrianglePointer(ctx, radius);
+
+      // 绘制中心圆圈和GO文字
+      this.drawCenterCircle(ctx, radius);
 
       // 兼容旧版本绘制
       if (ctx.draw) {
@@ -414,11 +465,15 @@ Component({
       const dy = touch.y - radius;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // 中心圆的半径
-      const hubRadius = 40;
+      // 中心圆的半径（更新为新的半径20）
+      const hubRadius = 20;
 
-      // 如果点击在中心圆区域，不处理（让hub点击事件处理）
-      if (distance < hubRadius) return;
+      // 如果点击在中心圆区域，触发转盘开始事件
+      if (distance < hubRadius) {
+        console.log('Center circle clicked, starting spin');
+        this.triggerEvent('hub-click');
+        return;
+      }
 
       // 如果点击在转盘外圈，也不处理
       if (distance > radius - 10) return;
@@ -457,10 +512,168 @@ Component({
       }
     },
 
-    // 处理中心按钮点击
-    onHubClick() {
-      if (this.data.isSpinning) return;
-      this.triggerEvent('hub-click');
+    // 清除高亮状态（当开始新转动时）
+    clearHighlight() {
+      if (this.data.showWinnerHighlight) {
+        this.setData({
+          showWinnerHighlight: false,
+          winnerIndex: -1,
+        });
+        this.drawWheel();
+      }
+    },
+
+    // 处理图片加载错误
+    onImageError() {
+      console.log('Center image failed to load, showing fallback');
+      this.setData({
+        showFallback: true,
+      });
+    },
+
+    // 增强颜色亮度
+    enhanceColor(color) {
+      // 将十六进制颜色转换为RGB
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      // 增强亮度和饱和度
+      const enhancedR = Math.min(255, Math.floor(r * 1.3 + 30));
+      const enhancedG = Math.min(255, Math.floor(g * 1.3 + 30));
+      const enhancedB = Math.min(255, Math.floor(b * 1.3 + 30));
+
+      return `rgb(${enhancedR}, ${enhancedG}, ${enhancedB})`;
+    },
+
+    // 降低颜色亮度
+    darkenColor(color) {
+      // 将十六进制颜色转换为RGB
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      // 降低亮度
+      const darkenedR = Math.floor(r * 0.3);
+      const darkenedG = Math.floor(g * 0.3);
+      const darkenedB = Math.floor(b * 0.3);
+
+      return `rgba(${darkenedR}, ${darkenedG}, ${darkenedB}, 0.3)`;
+    },
+
+    // 绘制中心圆圈和GO文字
+    drawCenterCircle(ctx, radius) {
+      ctx.save();
+
+      // 移动到画布中心
+      ctx.translate(radius, radius);
+
+      // 根据旋转状态调整圆圈大小（呼吸效果）
+      const scale = this.data.isSpinning ? 1.05 : 1;
+      ctx.scale(scale, scale);
+
+      // 绘制中心圆圈背景（缩小一半：半径从40改为20）
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+
+      // 由于Canvas不直接支持渐变字符串，使用createRadialGradient
+      if (ctx.createRadialGradient) {
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
+        gradient.addColorStop(0, this.data.isSpinning ? '#a78bfa' : '#7c5ce8');
+        gradient.addColorStop(1, this.data.isSpinning ? '#8b5cf6' : '#6750a4');
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = this.data.isSpinning ? '#8b5cf6' : '#6750a4';
+      }
+
+      ctx.fill();
+
+      // 绘制圆圈边框
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 绘制GO文字（调整字体大小适应更小的圆圈）
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 12px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GO', 0, 0);
+
+      // 添加文字阴影效果
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 1;
+      ctx.shadowOffsetX = 0.5;
+      ctx.shadowOffsetY = 0.5;
+      ctx.fillText('GO', 0, 0);
+
+      // 重置阴影
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      ctx.restore();
+    },
+
+    // 绘制三角形指针
+    drawTrianglePointer(ctx, radius) {
+      ctx.save();
+
+      // 移动到画布中心
+      ctx.translate(radius, radius);
+
+      // 根据旋转状态调整指针位置和大小
+      const offsetY = this.data.isSpinning ? -4 : 0;
+      const scale = this.data.isSpinning ? 1.1 : 1;
+      ctx.scale(scale, scale);
+
+      // 绘制三角形指针（底部贴着中心圆圈，缩短长度）
+      ctx.beginPath();
+      ctx.moveTo(0, -30 + offsetY); // 顶点（缩短到距离圆圈顶部10px）
+      ctx.lineTo(-8, -20 + offsetY); // 左下角（底部贴着圆圈顶部）
+      ctx.lineTo(8, -20 + offsetY); // 右下角（底部贴着圆圈顶部）
+      ctx.closePath();
+
+      // 添加三角形阴影
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3;
+
+      // 填充三角形
+      ctx.fillStyle = this.data.isSpinning ? '#a78bfa' : '#6750a4';
+      ctx.fill();
+
+      // 重置阴影
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      // 三角形边框
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.restore();
+    },
+
+    // 强制重绘方法（iOS兼容性）
+    forceRedraw() {
+      console.log('Force redraw for iOS compatibility');
+      // 重绘转盘
+      if (this.data.ctx) {
+        this.drawWheel();
+      }
+      // 触发页面重绘
+      this.setData({
+        canvasSize: this.data.canvasSize,
+      });
     },
 
     // 开始转动
@@ -476,11 +689,16 @@ Component({
         return;
       }
 
+      // 清除之前的高亮状态
+      this.clearHighlight();
+
       this.setData({
         isSpinning: true,
         lastResult: null,
         lastTickSector: -1,
         currentText: '转盘旋转中...',
+        showWinnerHighlight: false,
+        winnerIndex: -1,
       });
 
       // 震动反馈
@@ -550,6 +768,16 @@ Component({
 
           // 创建结束烟花效果
           this.createFireworkBurst(radius, radius, 36);
+
+          // 延迟显示高亮效果，让烟花先展示
+          setTimeout(() => {
+            this.setData({
+              winnerIndex: targetIdx,
+              showWinnerHighlight: true,
+            });
+            // 重新绘制转盘以显示高亮效果
+            this.drawWheel();
+          }, 500);
 
           // 触发结束事件
           this.triggerEvent('end', {

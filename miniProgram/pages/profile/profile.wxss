@@ -249,19 +249,19 @@
   align-items: center;
   z-index: 1000;
   opacity: 0;
-  visibility: hidden;
+  display: none;
   transition: all 0.3s ease;
 }
 
 .modal.show {
   opacity: 1;
-  visibility: visible;
+ display: block;
 }
 
 .modal-content {
   background: #ffffff;
   border-radius: 24rpx;
-  margin: 0 40rpx;
+  margin: 300rpx auto 0rpx;
   width: calc(100% - 80rpx);
   max-width: 600rpx;
   transform: scale(0.9);
@@ -354,15 +354,36 @@
   background-color: #fff;
   box-sizing: border-box;
   transition: border-color 0.2s ease;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.4;
 }
 
 .input:focus {
   border-color: #007aff;
   outline: none;
+  -webkit-appearance: none;
 }
 
 .input::placeholder {
   color: #999;
+  opacity: 1;
+  -webkit-text-fill-color: #999;
+}
+
+.input::-webkit-input-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input::-moz-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input:-ms-input-placeholder {
+  color: #999;
+  opacity: 1;
 }
 
 /* 响应式适配 */

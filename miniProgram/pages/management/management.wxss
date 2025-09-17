@@ -14,8 +14,8 @@
 
 /* 按钮样式 */
 .btn-sm {
-  padding: 6rpx 12rpx;
-  font-size: 20rpx;
+  padding: 20rpx 12rpx;
+  font-size: 25rpx;
   height: auto;
   line-height: 1.2;
   min-width: 50rpx;
@@ -24,8 +24,8 @@
 }
 
 .btn-xs {
-  padding: 6rpx 12rpx;
-  font-size: 18rpx;
+  padding: 24rpx 12rpx;
+  font-size: 25rpx;
   height: 28rpx;
   line-height: 1;
   min-width: 100rpx;
@@ -197,13 +197,13 @@
   align-items: center;
   z-index: 1000;
   opacity: 0;
-  visibility: hidden;
+  display: none;
   transition: all 0.3s ease;
 }
 
 .modal.show {
   opacity: 1;
-  visibility: visible;
+  display: block;
 }
 
 .modal-content {
@@ -216,10 +216,12 @@
   overflow: hidden;
   transform: scale(0.9);
   transition: transform 0.3s ease;
+  margin: 200rpx auto;
 }
 
 .modal.show .modal-content {
   transform: scale(1);
+  padding-bottom:50rpx;
 }
 
 .modal-header {
@@ -311,17 +313,38 @@
   font-size: 28rpx;
   color: #333;
   background-color: #fff;
-  box-sizing: border-box;
+  /* box-sizing: border-box;
   transition: border-color 0.2s ease;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent; */
+  line-height: 1.4;
 }
 
 .input:focus {
   border-color: #007aff;
   outline: none;
+  -webkit-appearance: none;
 }
 
 .input::placeholder {
   color: #999;
+  opacity: 1;
+  -webkit-text-fill-color: #999;
+}
+
+.input::-webkit-input-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input::-moz-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input:-ms-input-placeholder {
+  color: #999;
+  opacity: 1;
 }
 
 .textarea {
@@ -564,7 +587,7 @@
 
   .btn-sm {
     padding: 4rpx 8rpx;
-    font-size: 18rpx;
+    font-size: 25rpx;
     min-width: 40rpx;
     margin-top: 30rpx;
   }

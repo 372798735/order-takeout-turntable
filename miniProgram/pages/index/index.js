@@ -16,6 +16,7 @@ Page({
     hasItems: false,
     currentItemText: '??',
     realtimeText: '点击GO开始',
+    showFallback: false,
   },
 
   onLoad() {
@@ -26,6 +27,24 @@ Page({
     const wheelSize = Math.min(screenWidth * 0.85, 580);
 
     this.setData({ wheelSize });
+
+    // iOS特殊处理：预先显示备用按钮
+    if (systemInfo.platform === 'ios') {
+      console.log('iOS device detected, enabling fallback button');
+      console.log('System info:', systemInfo);
+      this.setData({
+        showFallback: true,
+      });
+
+      // 延迟强制更新，确保iOS真机显示
+      setTimeout(() => {
+        console.log('iOS: Force update layout');
+        this.setData({
+          showFallback: true,
+          wheelSize: this.data.wheelSize,
+        });
+      }, 500);
+    }
 
     // 加载数据
     this.loadData();
@@ -209,6 +228,14 @@ Page({
       });
     }
     this.hideResult();
+  },
+
+  // 处理图片加载错误
+  onImageError() {
+    console.log('Center image failed to load, showing fallback');
+    this.setData({
+      showFallback: true,
+    });
   },
 
   // 分享功能

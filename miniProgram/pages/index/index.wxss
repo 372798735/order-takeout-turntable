@@ -1,7 +1,7 @@
 /**index.wxss**/
 .page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #ffffff;
 }
 
 /* 头部样式已移除 */
@@ -9,6 +9,7 @@
 /* 主内容区域 */
 .main {
   padding: 32rpx 16rpx 16rpx;
+  position: relative;
 }
 
 /* 转盘卡片 */
@@ -18,14 +19,16 @@
   box-shadow: none !important;
   border: none !important;
   backdrop-filter: none !important;
+  position: relative;
 }
 
 .wheel-card .card-body {
-  padding: 24rpx;
+  padding: 0rpx;
   display: flex;
   justify-content: center;
   align-items: center;
   background: transparent !important;
+  margin-top: 50rpx;
 }
 
 /* 套餐选择容器 */
@@ -96,7 +99,7 @@
   position: absolute;
   top: -13rpx;
   left: 50%;
-  transform:translateX(-50%);
+  /* transform: translateX(-50%); */
   right: 0;
   z-index: 30;
   opacity: 0.8;
@@ -112,10 +115,8 @@
 
 .realtime-text.active {
   left: 50%;
-  transform:translateX(-50%);
   opacity: 1;
   animation: textPulse 2s infinite;
-  background: red !important;
   box-shadow: none;
 }
 
@@ -128,7 +129,7 @@
   font-size: 32rpx;
   font-weight: 700;
   text-align: center;
-  box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4);
+  /* box-shadow: 0 8rpx 24rpx rgba(103, 80, 164, 0.4); */
   white-space: nowrap;
   border: none !important;
   outline: none !important;
@@ -138,6 +139,7 @@
   width: auto;
   min-width: auto;
   flex-shrink: 0;
+  transform: translateX(-12%);
 }
 
 .wheel {
@@ -441,5 +443,161 @@
     max-width: 100%;
     width: 1160rpx;
     height: 1160rpx;
+  }
+}
+
+/* 外部三角形指针容器 */
+.external-pointer-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 580rpx;
+  height: 580rpx;
+  max-width: 580rpx;
+  max-height: 580rpx;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 100;
+  margin-top: 50rpx;
+}
+
+.external-pointer-container .pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.external-pointer-container .pointer-triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 24rpx solid transparent;
+  border-right: 24rpx solid transparent;
+  border-bottom: 36rpx solid #6750a4;
+  transform: translate(-50%, -80rpx) translateZ(0);
+  -webkit-transform: translate(-50%, -80rpx) translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+  z-index: 21;
+}
+
+.external-pointer-container .glow .pointer-triangle {
+  border-bottom-color: #7c5ce8;
+}
+
+.external-pointer-container .pointer-active .pointer-triangle {
+  border-bottom-color: #8b5cf6;
+  transform: translate(-50%, -88rpx) translateZ(0);
+  -webkit-transform: translate(-50%, -88rpx) translateZ(0);
+}
+
+/* 外部中心按钮容器 */
+.external-hub-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80rpx;
+  height: 80rpx;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 999;
+  margin-top: 50rpx;
+}
+
+.external-hub-container .hub {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  pointer-events: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.external-hub-container .hub-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  background-color: transparent;
+  z-index: 1000;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.external-hub-container .center-image {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: block;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1001;
+}
+
+.external-hub-container .center-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  background: linear-gradient(135deg, #6750a4, #7c5ce8);
+  color: white;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(103, 80, 164, 0.3);
+}
+
+.external-hub-container .hub.breathing .hub-button {
+  opacity: 0.9;
+}
+
+/* 动画定义 */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
   }
 }

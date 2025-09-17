@@ -1,5 +1,7 @@
 /* components/wheel-canvas/wheel-canvas.wxss */
-.wheel-wrap {
+
+/* 主容器 */
+.wheel-container {
   position: relative;
   width: 100%;
   max-width: 580rpx;
@@ -7,6 +9,16 @@
   max-height: 580rpx;
   aspect-ratio: 1 / 1;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 转盘容器 */
+.wheel-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,8 +62,8 @@
   outline: none;
 }
 
-/* 指针 */
-.pointer {
+/* 指针容器 */
+.pointer-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -61,18 +73,36 @@
   z-index: 20;
 }
 
+/* 指针 */
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 /* 三角形指针 */
 .pointer-triangle {
   position: absolute;
   top: 50%;
   left: 50%;
-  margin-left: -24rpx;
-  margin-top: -80rpx;
   width: 0;
   height: 0;
   border-left: 24rpx solid transparent;
   border-right: 24rpx solid transparent;
   border-bottom: 36rpx solid #6750a4;
+  transform: translate(-50%, -80rpx) translateZ(0);
+  -webkit-transform: translate(-50%, -80rpx) translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+  z-index: 21;
 }
 
 .glow .pointer-triangle {
@@ -81,21 +111,39 @@
 
 .pointer-active .pointer-triangle {
   border-bottom-color: #8b5cf6;
-  margin-left: -24rpx;
-  margin-top: -88rpx;
+  transform: translate(-50%, -88rpx) translateZ(0);
+  -webkit-transform: translate(-50%, -88rpx) translateZ(0);
+}
+
+/* 中心按钮容器 */
+.hub-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 中心GO按钮 */
 .hub {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  position: relative;
   width: 160rpx;
   height: 160rpx;
-  margin-left: -80rpx;
-  margin-top: -80rpx;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   pointer-events: auto;
-  z-index: 30;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* GO按钮 */
@@ -107,7 +155,12 @@
   height: 80rpx;
   border-radius: 40rpx;
   background-color: transparent;
-  z-index: 2;
+  z-index: 1000;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 /* 中心图片 */
@@ -116,6 +169,35 @@
   height: 80rpx;
   border-radius: 40rpx;
   display: block;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1001;
+}
+
+/* 备用文字按钮 */
+.center-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  background: linear-gradient(135deg, #6750a4, #7c5ce8);
+  color: white;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(103, 80, 164, 0.3);
 }
 
 /* 外圈环 */
@@ -128,15 +210,70 @@
   border-radius: 60rpx;
   border: 6rpx solid rgba(103, 80, 164, 0.25);
   box-sizing: border-box;
-  z-index: 1;
-}
-
-.hub.breathing .hub-ring {
-  animation: breathe 1.6s ease-in-out infinite;
+  z-index: 998;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .hub.breathing .hub-button {
   opacity: 0.9;
+}
+
+/* 获胜者遮罩容器 */
+.winner-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* 获胜者高亮遮罩 */
+.winner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  border-radius: 50%;
+}
+
+.winner-overlay.active {
+  opacity: 1;
+}
+
+.winner-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 70%
+  );
+  animation: winner-pulse 2s ease-in-out infinite;
+}
+
+/* 特效层容器 */
+.effects-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
 }
 
 /* 特效层 */
@@ -147,7 +284,6 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 5;
   opacity: 0;
   transition: opacity 1s ease;
 }
@@ -349,6 +485,18 @@
   50% {
     opacity: 1;
     transform: translate(-50%, 0) rotate(var(--angle)) scaleY(1.1);
+  }
+}
+
+@keyframes winner-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.9;
   }
 }
 

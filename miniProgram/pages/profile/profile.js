@@ -289,9 +289,66 @@ Page({
 
   // 分享小程序
   shareApp() {
+    // 显示分享选项
+    wx.showActionSheet({
+      itemList: ['分享给好友', '分享到朋友圈'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 分享给好友
+          this.shareToFriend();
+        } else if (res.tapIndex === 1) {
+          // 分享到朋友圈
+          this.shareToTimeline();
+        }
+      },
+      fail: () => {
+        // 如果用户取消选择，显示提示
+        // wx.showToast({
+        //   title: '已取消分享',
+        //   icon: 'none',
+        //   duration: 1500,
+        // });
+      },
+    });
+  },
+
+  // 分享给好友
+  shareToFriend() {
+    // 启用分享菜单
     wx.showShareMenu({
       withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline'],
+      menus: ['shareAppMessage'],
+    });
+
+    // 显示提示
+    wx.showModal({
+      title: '分享给好友',
+      content: '请点击右上角的"..."按钮，选择"转发"来分享给好友',
+      showCancel: false,
+      confirmText: '知道了',
+      success: () => {
+        // 可以在这里添加其他逻辑
+      },
+    });
+  },
+
+  // 分享到朋友圈
+  shareToTimeline() {
+    // 启用朋友圈分享菜单
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareTimeline'],
+    });
+
+    // 显示提示
+    wx.showModal({
+      title: '分享到朋友圈',
+      content: '请点击右上角的"..."按钮，选择"分享到朋友圈"',
+      showCancel: false,
+      confirmText: '知道了',
+      success: () => {
+        // 可以在这里添加其他逻辑
+      },
     });
   },
 
@@ -299,8 +356,7 @@ Page({
   contactUs() {
     wx.showModal({
       title: '意见反馈',
-      content:
-        '如有问题或建议，请通过以下方式联系我们：\n\n邮箱：feedback@example.com\n微信：wheel-support',
+      content: '如有问题或建议，请通过以下方式联系我们：\n\n邮箱：18819270610@1 63.com',
       showCancel: false,
       confirmText: '知道了',
     });
@@ -311,7 +367,7 @@ Page({
     return {
       title: '转盘抽取 - 让选择变得有趣',
       path: '/pages/index/index',
-      imageUrl: '/images/share-image.jpg',
+      imageUrl: '/images/center.png',
     };
   },
 
@@ -319,7 +375,7 @@ Page({
   onShareTimeline() {
     return {
       title: '转盘抽取小程序，让选择变得有趣！',
-      imageUrl: '/images/share-image.jpg',
+      imageUrl: '/images/center.png',
     };
   },
 });

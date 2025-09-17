@@ -183,7 +183,7 @@
   </view>
 
   <!-- 存储管理 -->
-  <view class="section">
+  <!-- <view class="section">
     <view class="card">
       <view class="card-header">
         <text>存储管理</text>
@@ -206,5 +206,5 @@
         
       </view>
     </view>
-  </view>
+  </view> -->
 </view>
