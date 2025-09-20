@@ -118,10 +118,10 @@
           <text class="form-label">套餐名称</text>
           <input 
             class="input" 
-            placeholder="请输入套餐名称" 
+            placeholder="请输入套餐名称（最多7个字）" 
             value="{{setForm.name}}"
             bindinput="onSetNameInput"
-            maxlength="20"
+            maxlength="7"
           />
         </view>
       </view>
@@ -144,20 +144,20 @@
           <text class="form-label">选项名称</text>
           <input 
             class="input" 
-            placeholder="请输入选项名称" 
+            placeholder="请输入选项名称（最多6个字）" 
             value="{{itemForm.name}}"
             bindinput="onItemNameInput"
-            maxlength="10"
+            maxlength="6"
           />
         </view>
         <view class="form-group">
           <text class="form-label">备注说明</text>
           <textarea 
             class="input textarea" 
-            placeholder="请输入备注说明（可选）" 
+            placeholder="请输入备注说明（最多20个字）" 
             value="{{itemForm.description}}"
             bindinput="onItemDescInput"
-            maxlength="100"
+            maxlength="20"
           ></textarea>
         </view>
         <view class="form-group">

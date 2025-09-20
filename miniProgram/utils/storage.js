@@ -225,7 +225,21 @@ class StorageManager {
       updatedAt: new Date().toISOString(),
     };
 
-    const wheelSets = [defaultWheelSet];
+    // 新增：诶呦转盘
+    const talentWheelSet = {
+      id: this.generateId(),
+      name: '诶呦',
+      items: [
+        { id: this.generateId(), name: '唱', color: '#EADDFF', description: '展示你的歌喉' },
+        { id: this.generateId(), name: '跳', color: '#FFD8E4', description: '来一段舞蹈' },
+        { id: this.generateId(), name: 'RAP', color: '#D0BCFF', description: '说唱表演时间' },
+        { id: this.generateId(), name: '篮球', color: '#BDE0FE', description: '篮球技巧展示' },
+      ],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const wheelSets = [defaultWheelSet, talentWheelSet];
     const currentWheelSetId = defaultWheelSet.id;
 
     this.saveWheelData(wheelSets, currentWheelSetId);

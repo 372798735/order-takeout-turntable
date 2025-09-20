@@ -177,29 +177,6 @@
   color: #ccc;
 }
 
-/* 设置列表 */
-.setting-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.setting-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 30rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.setting-item:last-child {
-  border-bottom: none;
-}
-
-.setting-label {
-  font-size: 28rpx;
-  color: #333;
-}
-
 /* 关于信息 */
 .about-info {
   display: flex;
@@ -255,7 +232,7 @@
 
 .modal.show {
   opacity: 1;
- display: block;
+  display: block;
 }
 
 .modal-content {
@@ -457,14 +434,6 @@
 
   .menu-desc {
     font-size: 22rpx;
-  }
-
-  .setting-item {
-    padding: 25rpx 0;
-  }
-
-  .setting-label {
-    font-size: 26rpx;
   }
 
   .about-label {

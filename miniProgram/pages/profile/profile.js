@@ -10,11 +10,6 @@ Page({
       totalSpins: 0,
       todaySpins: 0,
     },
-    settings: {
-      soundEnabled: true,
-      vibrationEnabled: true,
-      autoSave: true,
-    },
     showNicknameModal: false,
     nicknameForm: '',
   },
@@ -22,7 +17,6 @@ Page({
   onLoad() {
     this.loadUserInfo();
     this.loadStatistics();
-    this.loadSettings();
   },
 
   onShow() {
@@ -56,21 +50,6 @@ Page({
         todaySpins,
       },
     });
-  },
-
-  // 加载设置
-  loadSettings() {
-    const settings = wx.getStorageSync('app_settings') || {
-      soundEnabled: true,
-      vibrationEnabled: true,
-      autoSave: true,
-    };
-    this.setData({ settings });
-  },
-
-  // 保存设置
-  saveSettings() {
-    wx.setStorageSync('app_settings', this.data.settings);
   },
 
   // 选择头像
@@ -140,30 +119,6 @@ Page({
       title: '昵称更新成功',
       icon: 'success',
     });
-  },
-
-  // 音效开关
-  onSoundToggle(e) {
-    this.setData({
-      'settings.soundEnabled': e.detail.value,
-    });
-    this.saveSettings();
-  },
-
-  // 震动反馈开关
-  onVibrationToggle(e) {
-    this.setData({
-      'settings.vibrationEnabled': e.detail.value,
-    });
-    this.saveSettings();
-  },
-
-  // 自动保存开关
-  onAutoSaveToggle(e) {
-    this.setData({
-      'settings.autoSave': e.detail.value,
-    });
-    this.saveSettings();
   },
 
   // 导出数据

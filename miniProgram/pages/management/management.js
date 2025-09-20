@@ -251,6 +251,16 @@ Page({
       return;
     }
 
+    // 验证套餐名称字数限制（最多7个字）
+    if (name.trim().length > 7) {
+      wx.showToast({
+        title: '套餐名称最多7个字',
+        icon: 'none',
+        duration: 2000,
+      });
+      return;
+    }
+
     const wheelSets = [...this.data.wheelSets];
 
     if (this.data.editingSet) {
@@ -429,6 +439,26 @@ Page({
       wx.showToast({
         title: '请输入选项名称',
         icon: 'none',
+      });
+      return;
+    }
+
+    // 验证选项名称字数限制（最多6个字）
+    if (name.trim().length > 6) {
+      wx.showToast({
+        title: '选项名称最多6个字',
+        icon: 'none',
+        duration: 2000,
+      });
+      return;
+    }
+
+    // 验证备注说明字数限制（最多20个字）
+    if (description.trim().length > 20) {
+      wx.showToast({
+        title: '备注说明最多20个字',
+        icon: 'none',
+        duration: 2000,
       });
       return;
     }
