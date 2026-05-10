@@ -22,6 +22,7 @@
           </view>
         </view>
         <view
+          wx:if="{{showMusicButton}}"
           class="music-btn {{musicOn ? 'music-btn-on' : ''}}"
           bindtap="onToggleMusic"
           hover-class="music-btn-hover"

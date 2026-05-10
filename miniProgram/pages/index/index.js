@@ -4,6 +4,7 @@ const StorageManager = require('../../utils/storage');
 
 Page({
   data: {
+    showMusicButton: false,
     musicOn: false,
     wheelSets: [],
     currentSetIndex: 0,
@@ -74,21 +75,26 @@ Page({
 
     const settings = StorageManager.getAppSettings();
     const musicOn = !!settings.bgmEnabled;
+    this._bgmShouldPlay = musicOn;
 
     this._bgm = wx.createInnerAudioContext();
+    // 不与手机静音键联动，避免误以为「播放不了」（仍需媒体音量不为 0）
+    this._bgm.obeyMuteSwitch = false;
     this._bgm.src = '/audio/bgm.mp3';
     this._bgm.loop = true;
     this._bgm.volume = 0.45;
+
+    this._bgm.onCanplay(() => {
+      if (this._bgmShouldPlay && this._bgm) {
+        this._bgm.play();
+      }
+    });
 
     this._bgm.onError((err) => {
       console.error('背景音乐播放失败:', err);
     });
 
     this.setData({ musicOn });
-
-    if (musicOn) {
-      this._bgm.play();
-    }
   },
 
   onToggleMusic() {
@@ -96,10 +102,14 @@ Page({
     const settings = StorageManager.getAppSettings();
     StorageManager.setAppSettings({ ...settings, bgmEnabled: next });
 
+    this._bgmShouldPlay = next;
+
     if (next) {
-      this._bgm && this._bgm.play();
-    } else {
-      this._bgm && this._bgm.pause();
+      if (this._bgm) {
+        this._bgm.play();
+      }
+    } else if (this._bgm) {
+      this._bgm.pause();
     }
 
     this.setData({ musicOn: next });
@@ -110,7 +120,6 @@ Page({
       duration: 1200,
     });
   },
-
 
   // 加载数据
   loadData() {
