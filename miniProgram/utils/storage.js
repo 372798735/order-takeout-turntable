@@ -124,24 +124,22 @@ class StorageManager {
 
   // 获取应用设置
   static getAppSettings() {
+    const defaults = {
+      soundEnabled: true,
+      vibrationEnabled: true,
+      autoSave: true,
+      theme: 'light',
+      bgmEnabled: false,
+    };
     try {
       const settings = wx.getStorageSync(STORAGE_KEYS.APP_SETTINGS);
-      return (
-        settings || {
-          soundEnabled: true,
-          vibrationEnabled: true,
-          autoSave: true,
-          theme: 'light',
-        }
-      );
+      if (settings && typeof settings === 'object') {
+        return { ...defaults, ...settings };
+      }
+      return { ...defaults };
     } catch (error) {
       console.error('获取应用设置失败:', error);
-      return {
-        soundEnabled: true,
-        vibrationEnabled: true,
-        autoSave: true,
-        theme: 'light',
-      };
+      return { ...defaults };
     }
   }
 

@@ -22,6 +22,51 @@
   position: relative;
 }
 
+.wheel-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+  flex-wrap: wrap;
+}
+
+.music-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f0eef7;
+  border: 2rpx solid #e5e0f0;
+}
+
+.music-btn-on {
+  background: linear-gradient(135deg, rgba(103, 80, 164, 0.15), rgba(139, 92, 246, 0.18));
+  border-color: #c4b5fd;
+}
+
+.music-btn-hover {
+  opacity: 0.85;
+}
+
+.music-icon {
+  font-size: 30rpx;
+  line-height: 1;
+}
+
+.music-label {
+  font-size: 24rpx;
+  color: #5b4b8a;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.music-btn-on .music-label {
+  color: #6750a4;
+}
+
 .wheel-card .card-body {
   padding: 0rpx;
   display: flex;

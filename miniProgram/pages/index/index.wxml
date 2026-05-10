@@ -4,7 +4,7 @@
   <view class="main">
     <!-- 转盘卡片 -->
     <view class="wheel-card card">
-      <view class="card-header">
+      <view class="card-header wheel-card-header">
         <view class="set-select-container">
           <view class="set-select">
             <text class="set-label">当前转盘：</text>
@@ -20,6 +20,14 @@
               </view>
             </picker>
           </view>
+        </view>
+        <view
+          class="music-btn {{musicOn ? 'music-btn-on' : ''}}"
+          bindtap="onToggleMusic"
+          hover-class="music-btn-hover"
+        >
+          <text class="music-icon">{{musicOn ? '🔊' : '🔇'}}</text>
+          <text class="music-label">{{musicOn ? '音乐开' : '音乐关'}}</text>
         </view>
       </view>
 

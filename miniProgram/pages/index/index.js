@@ -1,8 +1,10 @@
 // index.js
 const app = getApp();
+const StorageManager = require('../../utils/storage');
 
 Page({
   data: {
+    musicOn: false,
     wheelSets: [],
     currentSetIndex: 0,
     currentSetId: null,
@@ -51,12 +53,64 @@ Page({
 
     // 设置初始状态
     app.globalData.isSpinning = false;
+
+    this.initBgm();
   },
 
   onShow() {
     // 每次显示页面时重新加载数据
     this.loadData();
   },
+
+  onUnload() {
+    if (this._bgm) {
+      this._bgm.destroy();
+      this._bgm = null;
+    }
+  },
+
+  initBgm() {
+    if (this._bgm) return;
+
+    const settings = StorageManager.getAppSettings();
+    const musicOn = !!settings.bgmEnabled;
+
+    this._bgm = wx.createInnerAudioContext();
+    this._bgm.src = '/audio/bgm.mp3';
+    this._bgm.loop = true;
+    this._bgm.volume = 0.45;
+
+    this._bgm.onError((err) => {
+      console.error('背景音乐播放失败:', err);
+    });
+
+    this.setData({ musicOn });
+
+    if (musicOn) {
+      this._bgm.play();
+    }
+  },
+
+  onToggleMusic() {
+    const next = !this.data.musicOn;
+    const settings = StorageManager.getAppSettings();
+    StorageManager.setAppSettings({ ...settings, bgmEnabled: next });
+
+    if (next) {
+      this._bgm && this._bgm.play();
+    } else {
+      this._bgm && this._bgm.pause();
+    }
+
+    this.setData({ musicOn: next });
+
+    wx.showToast({
+      title: next ? '音乐已开启' : '音乐已关闭',
+      icon: 'none',
+      duration: 1200,
+    });
+  },
+
 
   // 加载数据
   loadData() {
