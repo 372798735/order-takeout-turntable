@@ -1,9 +1,12 @@
 // pages/management/management.js
 const app = getApp();
 const StorageManager = require('../../utils/storage');
+const { POPULAR_PRESETS } = require('../../utils/popular-presets');
 
 Page({
   data: {
+    managementTab: 'hot',
+    popularPresets: [],
     wheelSets: [],
     currentSetId: null,
     currentSet: null,
@@ -132,11 +135,103 @@ Page({
 
     const debugInfo = `套餐数量: ${wheelSets.length}, 当前套餐: ${currentSet ? currentSet.name : '无'}, 选项数量: ${currentSet && currentSet.items ? currentSet.items.length : 0}`;
 
+    const collectedKeys = new Set(wheelSets.map((w) => w.presetSource).filter(Boolean));
+    const popularPresets = POPULAR_PRESETS.map((p) => ({
+      presetKey: p.presetKey,
+      name: p.name,
+      itemCount: p.items.length,
+      previewNames: p.items
+        .slice(0, 4)
+        .map((i) => i.name)
+        .join('、'),
+      collected: collectedKeys.has(p.presetKey),
+    }));
+
     this.setData({
       wheelSets,
       currentSetId: currentSet ? currentSet.id : null,
       currentSet,
       debugInfo,
+      popularPresets,
+    });
+  },
+
+  onTabChange(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (tab !== 'hot' && tab !== 'mine') return;
+    this.setData({ managementTab: tab });
+  },
+
+  collectPopularPreset(e) {
+    const presetKey = e.currentTarget.dataset.key;
+    const template = POPULAR_PRESETS.find((p) => p.presetKey === presetKey);
+    if (!template) return;
+
+    const wheelSets = [...(app.globalData.wheelSets || [])];
+    const existing = wheelSets.find((w) => w.presetSource === presetKey);
+
+    if (existing) {
+      wx.showModal({
+        title: '取消收藏',
+        content: '确定取消收藏？将从「我的转盘」中移除该转盘。',
+        confirmText: '取消收藏',
+        cancelText: '保留',
+        success: (res) => {
+          if (!res.confirm) return;
+          const nextSets = wheelSets.filter((w) => w.presetSource !== presetKey);
+          let currentSetId = app.globalData.currentWheelSetId;
+
+          if (existing.id === currentSetId) {
+            currentSetId = nextSets.length > 0 ? nextSets[0].id : null;
+          } else if (currentSetId && !nextSets.some((s) => s.id === currentSetId)) {
+            currentSetId = nextSets.length > 0 ? nextSets[0].id : null;
+          }
+
+          app.globalData.wheelSets = nextSets;
+          app.globalData.currentWheelSetId = currentSetId;
+          app.saveLocalData();
+          this.loadData();
+          wx.showToast({
+            title: '已取消收藏',
+            icon: 'success',
+          });
+        },
+      });
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const newSet = {
+      id: app.generateId(),
+      name: template.name,
+      presetSource: presetKey,
+      items: template.items.map((item) => ({
+        id: app.generateId(),
+        name: item.name,
+        description: item.description || '',
+        color: item.color,
+        createdAt: now,
+        updatedAt: now,
+      })),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    wheelSets.push(newSet);
+    app.globalData.wheelSets = wheelSets;
+    app.saveLocalData();
+    this.loadData();
+
+    wx.showModal({
+      title: '收藏成功',
+      content: '是否跳转到「我的转盘」查看？',
+      confirmText: '跳转',
+      cancelText: '留在此页',
+      success: (res) => {
+        if (res.confirm) {
+          this.setData({ managementTab: 'mine' });
+        }
+      },
     });
   },
 
@@ -189,30 +284,20 @@ Page({
           const wheelSets = [...this.data.wheelSets];
           wheelSets.splice(index, 1);
 
-          // 如果删除的是当前套餐，选择第一个套餐
           let currentSetId = this.data.currentSetId;
-          let currentSet = this.data.currentSet;
 
           if (id === currentSetId) {
             if (wheelSets.length > 0) {
               currentSetId = wheelSets[0].id;
-              currentSet = wheelSets[0];
             } else {
               currentSetId = null;
-              currentSet = null;
             }
           }
 
-          this.setData({
-            wheelSets,
-            currentSetId,
-            currentSet,
-          });
-
-          // 更新全局数据
           app.globalData.wheelSets = wheelSets;
           app.globalData.currentWheelSetId = currentSetId;
           app.saveLocalData();
+          this.loadData();
 
           wx.showToast({
             title: '删除成功',

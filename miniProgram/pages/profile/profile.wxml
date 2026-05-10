@@ -51,15 +51,15 @@
       <view class="about-info">
         <view class="about-item">
           <text class="about-label">版本信息：</text>
-          <text class="about-value">v1.0.0</text>
+          <text class="about-value">v1.2.0</text>
         </view>
         <view class="about-item">
           <text class="about-label">更新时间：</text>
-          <text class="about-value">2025-09-20</text>
+          <text class="about-value">2026-05-10</text>
         </view>
         <view class="about-item">
           <text class="about-label">开发者：</text>
-          <text class="about-value">转盘抽取团队</text>
+          <text class="about-value">it-林哥</text>
         </view>
       </view>
       <view class="about-actions">

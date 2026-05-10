@@ -1,5 +1,57 @@
 <!--management.wxml-->
 <view class="container">
+  <view class="mgmt-tabs">
+    <view
+      class="mgmt-tab {{managementTab === 'hot' ? 'mgmt-tab-active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="hot"
+      hover-class="mgmt-tab-hover"
+    >
+      <text class="mgmt-tab-title">热门转盘</text>
+      <text class="mgmt-tab-sub">精选模板</text>
+    </view>
+    <view
+      class="mgmt-tab {{managementTab === 'mine' ? 'mgmt-tab-active' : ''}}"
+      bindtap="onTabChange"
+      data-tab="mine"
+      hover-class="mgmt-tab-hover"
+    >
+      <text class="mgmt-tab-title">我的转盘</text>
+      <text class="mgmt-tab-sub">我的套餐</text>
+    </view>
+  </view>
+
+  <!-- 热门转盘 -->
+  <view class="section" wx:if="{{managementTab === 'hot'}}">
+    <view class="card">
+      <view class="card-header">
+        <text>热门转盘</text>
+      </view>
+      <view class="card-body">
+        <view class="popular-list">
+          <view class="popular-card" wx:for="{{popularPresets}}" wx:key="presetKey">
+            <view class="popular-main">
+              <text class="popular-name">{{item.name}}</text>
+              <text class="popular-meta">{{item.itemCount}} 个选项 · {{item.previewNames}}…</text>
+            </view>
+            <button
+              class="btn btn-primary btn-sm popular-collect-btn {{item.collected ? 'btn-collected' : ''}}"
+              bindtap="collectPopularPreset"
+              data-key="{{item.presetKey}}"
+            >
+              {{item.collected ? '取消收藏' : '收藏'}}
+            </button>
+          </view>
+        </view>
+        <view class="popular-tip">
+          <text>收藏后复制到「我的转盘」，同名模板每人一份，不会自动切换当前转盘。已收藏可点「取消收藏」从「我的转盘」移除；在「我的转盘」删除套餐后，热门页状态会同步更新。</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的转盘（原有能力） -->
+  <block wx:if="{{managementTab === 'mine'}}">
   <!-- 套餐管理 -->
   <view class="section">
     <view class="card">
@@ -106,7 +158,9 @@
     </view>
   </view>
 
-  <!-- 添加/编辑套餐弹窗 -->
+  </block>
+
+  <!-- 添加/编辑套餐弹窗（独立于 Tab，避免切换后不渲染） -->
   <view class="modal {{showSetModal ? 'show' : ''}}" bindtap="hideSetModal">
     <view class="modal-content" catchtap="preventClose">
       <view class="modal-header">
