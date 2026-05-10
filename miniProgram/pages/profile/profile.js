@@ -23,6 +23,12 @@ Page({
     this.loadStatistics();
   },
 
+  goToGuide() {
+    wx.navigateTo({
+      url: '/pages/guide/guide',
+    });
+  },
+
   // 加载用户信息
   loadUserInfo() {
     const userInfo = wx.getStorageSync('user_info') || {};

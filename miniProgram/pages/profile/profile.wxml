@@ -41,6 +41,22 @@
     </view>
   </view>
 
+  <!-- 帮助与介绍：与数据区、关于区并列，便于发现 -->
+  <view class="card">
+    <view class="card-header">
+      <text>帮助与介绍</text>
+    </view>
+    <view class="card-body card-body--menu">
+      <view class="menu-item menu-item--card" bindtap="goToGuide" hover-class="menu-item--hover">
+        <view class="menu-icon">📖</view>
+        <view class="menu-info">
+          <text class="menu-title">玩法介绍</text>
+          <text class="menu-desc">转盘怎么用、管理页热门模板与收藏说明</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+  </view>
 
   <!-- 关于 -->
   <view class="card">

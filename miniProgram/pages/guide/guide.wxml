@@ -1,0 +1,54 @@
+<view class="page">
+  <view class="hero">
+    <text class="hero-title">转盘抽取</text>
+    <text class="hero-desc">用转盘帮你做选择：聚餐、游戏、真心话……把纠结交给运气。</text>
+  </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">🎯</text>
+      <text>转盘页</text>
+    </view>
+    <view class="block">
+      <text class="block-p">底部 Tab 进入「转盘」。在顶部下拉选择当前要用的转盘套餐，点击转盘中心的 GO 开始旋转，停下后即可看到抽中的选项。</text>
+      <text class="block-p">旋转过程中，上方会显示当前划过的选项。点击某一扇区可进入该选项的详情页（若有备注会一并展示）。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">⚙️</text>
+      <text>管理页</text>
+    </view>
+    <view class="block">
+      <text class="block-h">我的转盘</text>
+      <text class="block-p">新建、编辑、删除转盘套餐与每个扇区的名称、备注和颜色。请先选中一个套餐，再管理其下的选项。</text>
+      <text class="block-h">热门转盘</text>
+      <text class="block-p">内置早餐、旅行、游戏等模板。点「收藏」会把模板复制到「我的转盘」，不会自动改你当前正在用的套餐；可按提示选择是否切到「我的转盘」查看。</text>
+      <text class="block-p">已收藏的模板可点「取消收藏」从「我的转盘」移除；若在「我的转盘」里删除了对应套餐，热门页的收藏状态会同步更新。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">
+      <text class="section-icon">👤</text>
+      <text>我的</text>
+    </view>
+    <view class="block">
+      <text class="block-p">可设置头像与昵称（仅保存在本机）。「我的数据」汇总当前有多少个转盘套餐和选项，便于一眼了解内容量。</text>
+    </view>
+  </view>
+
+  <view class="section section-tip">
+    <view class="section-title">
+      <text class="section-icon">💡</text>
+      <text>温馨提示</text>
+    </view>
+    <view class="block">
+      <text class="block-p">转盘与选项数据默认保存在本设备；卸载或清除缓存可能丢失数据，重要内容请自行备份。</text>
+      <text class="block-p">套餐名、选项名在编辑时分别有字数限制，便于在转盘上清晰展示。</text>
+    </view>
+  </view>
+
+  <view class="footer-space"></view>
+</view>

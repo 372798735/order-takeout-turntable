@@ -4,6 +4,7 @@
     "pages/management/management",
     "pages/detail/detail",
     "pages/profile/profile",
+    "pages/guide/guide",
     "pages/login/login"
   ],
   "window": {
