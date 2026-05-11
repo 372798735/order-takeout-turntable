@@ -12,7 +12,7 @@ App({
   },
 
   onLaunch() {
-    console.log('转盘抽取小程序启动');
+    console.log('幸运大转盘小程序启动');
 
     // 检查登录状态
     this.checkLoginStatus();

@@ -326,7 +326,7 @@ Page({
   // 分享功能
   onShareAppMessage() {
     return {
-      title: '转盘抽取 - 让选择变得有趣',
+      title: '幸运大转盘 - 让选择变得有趣',
       path: '/pages/index/index',
       imageUrl: '/images/center.png',
     };
@@ -335,7 +335,7 @@ Page({
   // 分享到朋友圈
   onShareTimeline() {
     return {
-      title: '转盘抽取小程序，让选择变得有趣！',
+      title: '幸运大转盘小程序，让选择变得有趣！',
       imageUrl: '/images/center.png',
     };
   },

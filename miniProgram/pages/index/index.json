@@ -2,5 +2,5 @@
   "usingComponents": {
     "wheel-canvas": "/components/wheel-canvas/wheel-canvas"
   },
-  "navigationBarTitleText": "转盘抽取"
+  "navigationBarTitleText": "幸运大转盘"
 }

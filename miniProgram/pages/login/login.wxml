@@ -4,7 +4,7 @@
     <!-- Logo区域 -->
     <view class="logo-section">
       <view class="logo">🎯</view>
-      <text class="app-name">转盘抽取</text>
+      <text class="app-name">幸运大转盘</text>
       <text class="app-desc">让选择变得有趣</text>
     </view>
 

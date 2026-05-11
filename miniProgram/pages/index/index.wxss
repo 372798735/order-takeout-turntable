@@ -1,7 +1,163 @@
 /**index.wxss**/
 .page {
   min-height: 100vh;
-  background: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+  /* 中性浅灰底 + 极淡紫灰，避免大块艳紫 */
+  background: linear-gradient(
+    185deg,
+    #fcfcfd 0%,
+    #f6f5f8 32%,
+    #f1f0f4 58%,
+    #ebe9ef 100%
+  );
+}
+
+/* 背景装饰层（不响应点击） */
+.page-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-mesh {
+  position: absolute;
+  inset: -35%;
+  opacity: 1;
+  background:
+    radial-gradient(ellipse 72% 48% at 12% 18%, rgba(103, 80, 164, 0.07), transparent 55%),
+    radial-gradient(ellipse 68% 52% at 92% 8%, rgba(91, 99, 130, 0.05), transparent 52%),
+    radial-gradient(ellipse 60% 45% at 78% 92%, rgba(120, 110, 150, 0.045), transparent 50%);
+}
+
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 1;
+}
+
+/* 大光斑：低饱和、大过渡，像天光而不是色块 */
+.bg-blob--1 {
+  width: 480rpx;
+  height: 480rpx;
+  left: -140rpx;
+  top: 6%;
+  background: radial-gradient(
+    circle at 40% 38%,
+    rgba(103, 80, 164, 0.11) 0%,
+    rgba(103, 80, 164, 0.03) 45%,
+    transparent 68%
+  );
+  animation: bgFloat1 16s ease-in-out infinite;
+}
+
+.bg-blob--2 {
+  width: 400rpx;
+  height: 400rpx;
+  right: -110rpx;
+  top: 36%;
+  background: radial-gradient(
+    circle at 55% 45%,
+    rgba(130, 125, 160, 0.09) 0%,
+    rgba(160, 155, 185, 0.04) 48%,
+    transparent 70%
+  );
+  animation: bgFloat2 18s ease-in-out infinite;
+}
+
+.bg-blob--3 {
+  width: 320rpx;
+  height: 320rpx;
+  left: 22%;
+  bottom: 4%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(103, 80, 164, 0.075) 0%,
+    transparent 62%
+  );
+  animation: bgFloat3 20s ease-in-out infinite;
+}
+
+.bg-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1rpx solid rgba(80, 72, 105, 0.07);
+}
+
+.bg-ring--1 {
+  width: 520rpx;
+  height: 520rpx;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  opacity: 0.55;
+  animation: bgPulse 14s ease-in-out infinite;
+}
+
+.bg-ring--2 {
+  width: 640rpx;
+  height: 640rpx;
+  left: 50%;
+  top: 14%;
+  transform: translateX(-50%);
+  border-color: rgba(90, 85, 115, 0.05);
+  opacity: 0.5;
+  animation: bgPulse 16s ease-in-out infinite 1.2s;
+}
+
+.bg-dots {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: radial-gradient(rgba(75, 70, 95, 0.09) 1rpx, transparent 1rpx);
+  background-size: 40rpx 40rpx;
+}
+
+@keyframes bgFloat1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24rpx, -20rpx) scale(1.04);
+  }
+}
+
+@keyframes bgFloat2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-28rpx, 16rpx) scale(1.06);
+  }
+}
+
+@keyframes bgFloat3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(14rpx, -10rpx);
+  }
+}
+
+@keyframes bgPulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.38;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.02);
+    opacity: 0.58;
+  }
 }
 
 /* 头部样式已移除 */
@@ -10,6 +166,7 @@
 .main {
   padding: 32rpx 16rpx 16rpx;
   position: relative;
+  z-index: 1;
 }
 
 /* 转盘卡片 */

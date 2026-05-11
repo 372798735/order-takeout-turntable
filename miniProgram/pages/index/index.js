@@ -247,15 +247,8 @@ Page({
     }
   },
 
-  // 项目点击
-  onItemClick(e) {
-    const item = e.detail.item;
-    if (item && this.data.currentSetId) {
-      wx.navigateTo({
-        url: `/pages/detail/detail?setId=${this.data.currentSetId}&itemId=${item.id}`,
-      });
-    }
-  },
+  // 首页点击扇区不再跳转详情
+  onItemClick() {},
 
   // 处理当前项变化
   onCurrentChange(e) {
@@ -304,7 +297,7 @@ Page({
   // 分享功能
   onShareAppMessage() {
     return {
-      title: '转盘抽取 - 让选择变得有趣',
+      title: '幸运大转盘 - 让选择变得有趣',
       path: '/pages/index/index',
     };
   },

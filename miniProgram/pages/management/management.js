@@ -684,7 +684,7 @@ Page({
   // 分享功能
   onShareAppMessage() {
     return {
-      title: '转盘抽取 - 管理你的选项',
+      title: '幸运大转盘 - 管理你的选项',
       path: '/pages/management/management',
     };
   },

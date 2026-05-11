@@ -1,7 +1,7 @@
 Page({
   onShareAppMessage() {
     return {
-      title: '转盘抽取 · 玩法介绍',
+      title: '幸运大转盘 · 玩法介绍',
       path: '/pages/index/index',
     };
   },
