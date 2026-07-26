@@ -1,13 +1,17 @@
 <!--index.wxml-->
 <view class="page">
   <view class="page-bg" aria-hidden="true">
-    <view class="bg-mesh"></view>
-    <view class="bg-blob bg-blob--1"></view>
-    <view class="bg-blob bg-blob--2"></view>
-    <view class="bg-blob bg-blob--3"></view>
+    <view class="bg-base"></view>
+    <view class="bg-aurora"></view>
+    <view class="bg-orb bg-orb--tl"></view>
+    <view class="bg-orb bg-orb--tr"></view>
+    <view class="bg-orb bg-orb--bl"></view>
+    <view class="bg-stage"></view>
     <view class="bg-ring bg-ring--1"></view>
     <view class="bg-ring bg-ring--2"></view>
-    <view class="bg-dots"></view>
+    <view class="bg-ring bg-ring--3"></view>
+    <view class="bg-sparkle"></view>
+    <view class="bg-vignette"></view>
   </view>
   <!-- 主内容区域 -->
   <view class="main">

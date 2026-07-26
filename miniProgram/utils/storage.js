@@ -129,7 +129,7 @@ class StorageManager {
       vibrationEnabled: true,
       autoSave: true,
       theme: 'light',
-      bgmEnabled: false,
+      bgmEnabled: true,
     };
     try {
       const settings = wx.getStorageSync(STORAGE_KEYS.APP_SETTINGS);

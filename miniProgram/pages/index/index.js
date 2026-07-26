@@ -2,10 +2,14 @@
 const app = getApp();
 const StorageManager = require('../../utils/storage');
 
+// joy127 短链会 301 到 jstools，真机对跳转支持差，直接用最终地址
+const BGM_SRC =
+  'https://joy2.jstools.net/uploads/mp3/202507/03/11376865fb1162e4a661652.mp3';
+
 Page({
   data: {
-    showMusicButton: false,
-    musicOn: false,
+    showMusicButton: true,
+    musicOn: true,
     wheelSets: [],
     currentSetIndex: 0,
     currentSetId: null,
@@ -61,6 +65,7 @@ Page({
   onShow() {
     // 每次显示页面时重新加载数据
     this.loadData();
+    this.tryPlayBgm();
   },
 
   onUnload() {
@@ -76,25 +81,76 @@ Page({
     const settings = StorageManager.getAppSettings();
     const musicOn = !!settings.bgmEnabled;
     this._bgmShouldPlay = musicOn;
+    this._bgmReady = false;
+
+    // 2.3.0+ 需用全局接口，实例 obeyMuteSwitch 在真机上可能不生效
+    try {
+      wx.setInnerAudioOption({
+        obeyMuteSwitch: false,
+        mixWithOther: true,
+      });
+    } catch (e) {
+      // 低版本基础库忽略
+    }
 
     this._bgm = wx.createInnerAudioContext();
-    // 不与手机静音键联动，避免误以为「播放不了」（仍需媒体音量不为 0）
     this._bgm.obeyMuteSwitch = false;
-    this._bgm.src = '/audio/bgm.mp3';
     this._bgm.loop = true;
     this._bgm.volume = 0.45;
 
     this._bgm.onCanplay(() => {
-      if (this._bgmShouldPlay && this._bgm) {
-        this._bgm.play();
-      }
+      this._bgmReady = true;
+      this.tryPlayBgm();
+    });
+
+    this._bgm.onPlay(() => {
+      console.log('背景音乐开始播放');
     });
 
     this._bgm.onError((err) => {
       console.error('背景音乐播放失败:', err);
+      // 网络直链失败时，再尝试下载到本地后播放（安卓更稳）
+      if (!this._bgmDownloadTried) {
+        this._bgmDownloadTried = true;
+        this.loadBgmViaDownload();
+      }
     });
 
+    // 优先直链播放；失败走 downloadFile
+    this._bgm.src = BGM_SRC;
+    this.tryPlayBgm();
     this.setData({ musicOn });
+  },
+
+  loadBgmViaDownload() {
+    wx.downloadFile({
+      url: BGM_SRC,
+      success: (res) => {
+        if (res.statusCode === 200 && this._bgm && res.tempFilePath) {
+          this._bgm.src = res.tempFilePath;
+          this.tryPlayBgm();
+        } else {
+          console.error('背景音乐下载异常:', res);
+        }
+      },
+      fail: (err) => {
+        console.error('背景音乐下载失败（请检查 downloadFile 合法域名）:', err);
+        wx.showToast({
+          title: '音乐加载失败，请配置域名',
+          icon: 'none',
+          duration: 2500,
+        });
+      },
+    });
+  },
+
+  tryPlayBgm() {
+    if (!this._bgmShouldPlay || !this._bgm) return;
+    try {
+      this._bgm.play();
+    } catch (e) {
+      console.error('背景音乐 play 异常:', e);
+    }
   },
 
   onToggleMusic() {
@@ -105,8 +161,11 @@ Page({
     this._bgmShouldPlay = next;
 
     if (next) {
-      if (this._bgm) {
-        this._bgm.play();
+      // 用户点击属于手势交互，可解锁 iOS/部分安卓的自动播放限制
+      if (!this._bgm) {
+        this.initBgm();
+      } else {
+        this.tryPlayBgm();
       }
     } else if (this._bgm) {
       this._bgm.pause();
@@ -209,6 +268,9 @@ Page({
       });
       return;
     }
+
+    // 用户手势可解锁真机自动播放限制
+    this.tryPlayBgm();
 
     this.setData({
       isSpinning: true,

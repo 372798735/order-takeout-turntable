@@ -3,14 +3,8 @@
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  /* 中性浅灰底 + 极淡紫灰，避免大块艳紫 */
-  background: linear-gradient(
-    185deg,
-    #fcfcfd 0%,
-    #f6f5f8 32%,
-    #f1f0f4 58%,
-    #ebe9ef 100%
-  );
+  /* 主题紫浅底，避免纯灰 */
+  background: #f3f0f8;
 }
 
 /* 背景装饰层（不响应点击） */
@@ -25,97 +19,175 @@
   overflow: hidden;
 }
 
-.bg-mesh {
+/* 底层：斜向渐变 + 深度 */
+.bg-base {
   position: absolute;
-  inset: -35%;
-  opacity: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   background:
-    radial-gradient(ellipse 72% 48% at 12% 18%, rgba(103, 80, 164, 0.07), transparent 55%),
-    radial-gradient(ellipse 68% 52% at 92% 8%, rgba(91, 99, 130, 0.05), transparent 52%),
-    radial-gradient(ellipse 60% 45% at 78% 92%, rgba(120, 110, 150, 0.045), transparent 50%);
+    linear-gradient(
+      165deg,
+      #faf8fc 0%,
+      #f0ebf7 28%,
+      #ebe4f4 55%,
+      #e4dcf0 78%,
+      #ddd4eb 100%
+    );
 }
 
-.bg-blob {
+/* 顶部光幕：拉出纵深 */
+.bg-aurora {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: -8%;
+  height: 58%;
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 20%, rgba(103, 80, 164, 0.22), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 78% 8%, rgba(124, 92, 232, 0.16), transparent 58%),
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 70%);
+  filter: blur(2rpx);
+}
+
+/* 悬浮光球：亮核 + 软影，营造立体感 */
+.bg-orb {
   position: absolute;
   border-radius: 50%;
-  opacity: 1;
+  filter: blur(1rpx);
 }
 
-/* 大光斑：低饱和、大过渡，像天光而不是色块 */
-.bg-blob--1 {
-  width: 480rpx;
-  height: 480rpx;
-  left: -140rpx;
-  top: 6%;
-  background: radial-gradient(
-    circle at 40% 38%,
-    rgba(103, 80, 164, 0.11) 0%,
-    rgba(103, 80, 164, 0.03) 45%,
-    transparent 68%
-  );
+.bg-orb--tl {
+  width: 420rpx;
+  height: 420rpx;
+  left: -120rpx;
+  top: 4%;
+  background:
+    radial-gradient(
+      circle at 38% 36%,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(180, 160, 230, 0.35) 28%,
+      rgba(103, 80, 164, 0.18) 52%,
+      transparent 72%
+    );
+  box-shadow: 0 40rpx 80rpx rgba(103, 80, 164, 0.12);
   animation: bgFloat1 16s ease-in-out infinite;
 }
 
-.bg-blob--2 {
-  width: 400rpx;
-  height: 400rpx;
-  right: -110rpx;
-  top: 36%;
-  background: radial-gradient(
-    circle at 55% 45%,
-    rgba(130, 125, 160, 0.09) 0%,
-    rgba(160, 155, 185, 0.04) 48%,
-    transparent 70%
-  );
+.bg-orb--tr {
+  width: 360rpx;
+  height: 360rpx;
+  right: -100rpx;
+  top: 28%;
+  background:
+    radial-gradient(
+      circle at 58% 42%,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(139, 92, 246, 0.22) 32%,
+      rgba(103, 80, 164, 0.12) 55%,
+      transparent 72%
+    );
+  box-shadow: 0 36rpx 72rpx rgba(91, 70, 150, 0.1);
   animation: bgFloat2 18s ease-in-out infinite;
 }
 
-.bg-blob--3 {
-  width: 320rpx;
-  height: 320rpx;
-  left: 22%;
-  bottom: 4%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(103, 80, 164, 0.075) 0%,
-    transparent 62%
-  );
+.bg-orb--bl {
+  width: 300rpx;
+  height: 300rpx;
+  left: 8%;
+  bottom: 6%;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(124, 92, 232, 0.2) 0%,
+      rgba(103, 80, 164, 0.08) 45%,
+      transparent 70%
+    );
   animation: bgFloat3 20s ease-in-out infinite;
+}
+
+/* 转盘舞台：椭圆光池，托起主体 */
+.bg-stage {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 720rpx;
+  height: 720rpx;
+  transform: translate(-50%, -42%);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.28) 32%,
+      rgba(103, 80, 164, 0.1) 58%,
+      transparent 74%
+    );
+  box-shadow:
+    0 0 0 1rpx rgba(255, 255, 255, 0.35) inset,
+    0 48rpx 100rpx rgba(103, 80, 164, 0.14);
 }
 
 .bg-ring {
   position: absolute;
+  left: 50%;
+  top: 42%;
   border-radius: 50%;
-  border: 1rpx solid rgba(80, 72, 105, 0.07);
+  box-sizing: border-box;
+  transform: translate(-50%, -42%);
 }
 
 .bg-ring--1 {
-  width: 520rpx;
-  height: 520rpx;
-  left: 50%;
-  top: 18%;
-  transform: translateX(-50%);
-  opacity: 0.55;
+  width: 560rpx;
+  height: 560rpx;
+  border: 2rpx solid rgba(103, 80, 164, 0.12);
+  box-shadow:
+    0 0 40rpx rgba(103, 80, 164, 0.06),
+    inset 0 0 30rpx rgba(255, 255, 255, 0.25);
   animation: bgPulse 14s ease-in-out infinite;
 }
 
 .bg-ring--2 {
-  width: 640rpx;
-  height: 640rpx;
-  left: 50%;
-  top: 14%;
-  transform: translateX(-50%);
-  border-color: rgba(90, 85, 115, 0.05);
-  opacity: 0.5;
-  animation: bgPulse 16s ease-in-out infinite 1.2s;
+  width: 680rpx;
+  height: 680rpx;
+  border: 1rpx solid rgba(103, 80, 164, 0.08);
+  animation: bgPulse 16s ease-in-out infinite 0.8s;
 }
 
-.bg-dots {
+.bg-ring--3 {
+  width: 800rpx;
+  height: 800rpx;
+  border: 1rpx dashed rgba(103, 80, 164, 0.06);
+  animation: bgPulse 18s ease-in-out infinite 1.6s;
+}
+
+/* 细微高光点缀 */
+.bg-sparkle {
   position: absolute;
-  inset: 0;
-  opacity: 0.22;
-  background-image: radial-gradient(rgba(75, 70, 95, 0.09) 1rpx, transparent 1rpx);
-  background-size: 40rpx 40rpx;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0.45;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.9) 0 2rpx, transparent 3rpx),
+    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.7) 0 1.5rpx, transparent 3rpx),
+    radial-gradient(circle at 70% 58%, rgba(255, 255, 255, 0.55) 0 1.5rpx, transparent 3rpx),
+    radial-gradient(circle at 28% 68%, rgba(180, 160, 230, 0.5) 0 2rpx, transparent 3rpx),
+    radial-gradient(rgba(103, 80, 164, 0.06) 1rpx, transparent 1rpx);
+  background-size: auto, auto, auto, auto, 36rpx 36rpx;
+}
+
+/* 四角压暗：增强景深 */
+.bg-vignette {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 40%, transparent 45%, rgba(90, 70, 140, 0.1) 100%);
 }
 
 @keyframes bgFloat1 {
@@ -124,7 +196,7 @@
     transform: translate(0, 0) scale(1);
   }
   50% {
-    transform: translate(24rpx, -20rpx) scale(1.04);
+    transform: translate(28rpx, -24rpx) scale(1.05);
   }
 }
 
@@ -134,7 +206,7 @@
     transform: translate(0, 0) scale(1);
   }
   50% {
-    transform: translate(-28rpx, 16rpx) scale(1.06);
+    transform: translate(-30rpx, 18rpx) scale(1.06);
   }
 }
 
@@ -144,19 +216,19 @@
     transform: translate(0, 0);
   }
   50% {
-    transform: translate(14rpx, -10rpx);
+    transform: translate(16rpx, -12rpx);
   }
 }
 
 @keyframes bgPulse {
   0%,
   100% {
-    transform: translateX(-50%) scale(1);
-    opacity: 0.38;
+    transform: translate(-50%, -42%) scale(1);
+    opacity: 0.55;
   }
   50% {
-    transform: translateX(-50%) scale(1.02);
-    opacity: 0.58;
+    transform: translate(-50%, -42%) scale(1.03);
+    opacity: 0.85;
   }
 }
 
