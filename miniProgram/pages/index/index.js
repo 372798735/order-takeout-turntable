@@ -2,14 +2,40 @@
 const app = getApp();
 const StorageManager = require('../../utils/storage');
 
-// joy127 短链会 301 到 jstools，真机对跳转支持差，直接用最终地址
-const BGM_SRC =
-  'https://joy2.jstools.net/uploads/mp3/202507/03/11376865fb1162e4a661652.mp3';
+const MUSIC_TRACKS = [
+  {
+    title: '太多',
+    url: 'https://joy4.jstools.net/uploads/mp3/202606/07/21066a256cece37c2191330.mp3',
+  },
+  {
+    title: '皇后大道东',
+    url: 'https://joy3.jstools.net/uploads/mp3/202507/10/1514686f684faef5a879219.mp3',
+  },
+  {
+    title: '我是真的爱上你',
+    url: 'https://joy3.jstools.net/uploads/mp3/202608/06/23546a74ae4f16db1781423.mp3',
+  },
+  {
+    title: '平凡之路',
+    url: 'https://joy3.jstools.net/uploads/mp3/202607/24/08196a62af7bdf7eb120809.mp3',
+  },
+  {
+    title: '偏爱',
+    url: 'https://joy3.jstools.net/uploads/mp3/202607/14/07246a5573afb17b3788160.mp3',
+  },
+  {
+    title: '往事只能回味',
+    url: 'https://joy3.jstools.net/uploads/mp3/202607/29/08076a694428775ec302065.mp3',
+  },
+];
 
 Page({
   data: {
     showMusicButton: true,
-    musicOn: true,
+    musicOn: false,
+    musicNames: MUSIC_TRACKS.map((track) => track.title),
+    currentMusicIndex: 0,
+    currentMusicName: MUSIC_TRACKS[0].title,
     wheelSets: [],
     currentSetIndex: 0,
     currentSetId: null,
@@ -69,6 +95,10 @@ Page({
   },
 
   onUnload() {
+    if (this._pendingBgm) {
+      this._pendingBgm.destroy();
+      this._pendingBgm = null;
+    }
     if (this._bgm) {
       this._bgm.destroy();
       this._bgm = null;
@@ -100,6 +130,7 @@ Page({
 
     this._bgm.onCanplay(() => {
       this._bgmReady = true;
+      this._bgmLoadError = false;
       this.tryPlayBgm();
     });
 
@@ -109,24 +140,103 @@ Page({
 
     this._bgm.onError((err) => {
       console.error('背景音乐播放失败:', err);
+      this._bgmLoadError = true;
+      if (!this._bgmShouldPlay) return;
+
       // 网络直链失败时，再尝试下载到本地后播放（安卓更稳）
       if (!this._bgmDownloadTried) {
         this._bgmDownloadTried = true;
-        this.loadBgmViaDownload();
+        this.loadBgmViaDownload(this.getCurrentMusic());
       }
     });
 
-    // 优先直链播放；失败走 downloadFile
-    this._bgm.src = BGM_SRC;
+    // 默认关闭音乐，但预缓冲第一首，用户点击后可立即播放。
+    this.setBgmSource(this.getCurrentMusic());
     this.tryPlayBgm();
     this.setData({ musicOn });
   },
 
-  loadBgmViaDownload() {
+  getCurrentMusic() {
+    return MUSIC_TRACKS[this.data.currentMusicIndex] || MUSIC_TRACKS[0];
+  },
+
+  setBgmSource(track) {
+    if (!this._bgm || !track) return;
+
+    this._bgmDownloadTried = false;
+    this._bgmReady = false;
+    this._bgmLoadError = false;
+    this._bgmSourceTrackIndex = this.data.currentMusicIndex;
+    this._bgm.src = track.url;
+  },
+
+  prepareMusicSwitch(track, trackIndex) {
+    if (!track || !this._bgmShouldPlay) return;
+
+    if (this._pendingBgm) {
+      this._pendingBgm.destroy();
+    }
+
+    const pendingBgm = wx.createInnerAudioContext();
+    this._pendingBgm = pendingBgm;
+    this._pendingMusicIndex = trackIndex;
+    pendingBgm.obeyMuteSwitch = false;
+    pendingBgm.loop = true;
+    pendingBgm.volume = 0.45;
+
+    pendingBgm.onCanplay(() => {
+      if (
+        this._pendingBgm !== pendingBgm ||
+        this._pendingMusicIndex !== this.data.currentMusicIndex ||
+        !this._bgmShouldPlay
+      ) {
+        return;
+      }
+
+      const previousBgm = this._bgm;
+      this._bgm = pendingBgm;
+      this._pendingBgm = null;
+      this._pendingMusicIndex = null;
+      this._bgmReady = true;
+      this._bgmLoadError = false;
+      this._bgmSourceTrackIndex = this.data.currentMusicIndex;
+
+      if (previousBgm) {
+        previousBgm.stop();
+        previousBgm.destroy();
+      }
+
+      this.tryPlayBgm();
+    });
+
+    pendingBgm.onError((err) => {
+      console.error('切换背景音乐失败:', err);
+      if (this._pendingBgm === pendingBgm) {
+        this._pendingBgm.destroy();
+        this._pendingBgm = null;
+        this._pendingMusicIndex = null;
+        wx.showToast({
+          title: '新音乐加载失败',
+          icon: 'none',
+        });
+      }
+    });
+
+    pendingBgm.src = track.url;
+  },
+
+  loadBgmViaDownload(track) {
+    if (!track) return;
+
     wx.downloadFile({
-      url: BGM_SRC,
+      url: track.url,
       success: (res) => {
-        if (res.statusCode === 200 && this._bgm && res.tempFilePath) {
+        if (
+          res.statusCode === 200 &&
+          this._bgm &&
+          res.tempFilePath &&
+          this.getCurrentMusic().url === track.url
+        ) {
           this._bgm.src = res.tempFilePath;
           this.tryPlayBgm();
         } else {
@@ -165,10 +275,18 @@ Page({
       if (!this._bgm) {
         this.initBgm();
       } else {
+        if (this._bgmSourceTrackIndex !== this.data.currentMusicIndex || this._bgmLoadError) {
+          this.setBgmSource(this.getCurrentMusic());
+        }
         this.tryPlayBgm();
       }
     } else if (this._bgm) {
       this._bgm.pause();
+      if (this._pendingBgm) {
+        this._pendingBgm.destroy();
+        this._pendingBgm = null;
+        this._pendingMusicIndex = null;
+      }
     }
 
     this.setData({ musicOn: next });
@@ -178,6 +296,25 @@ Page({
       icon: 'none',
       duration: 1200,
     });
+  },
+
+  onMusicChange(e) {
+    const currentMusicIndex = Number(e.detail.value);
+    const track = MUSIC_TRACKS[currentMusicIndex];
+    if (!track) return;
+
+    const shouldContinuePlaying = this.data.musicOn;
+    this.setData({
+      currentMusicIndex,
+      currentMusicName: track.title,
+    });
+
+    if (shouldContinuePlaying) {
+      this.prepareMusicSwitch(track, currentMusicIndex);
+    } else if (this._bgm) {
+      // 关闭状态下提前缓冲所选歌曲，下一次点击播放无需重新请求。
+      this.setBgmSource(track);
+    }
   },
 
   // 加载数据

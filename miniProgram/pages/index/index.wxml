@@ -34,14 +34,27 @@
             </picker>
           </view>
         </view>
-        <view
-          wx:if="{{showMusicButton}}"
-          class="music-btn {{musicOn ? 'music-btn-on' : ''}}"
-          bindtap="onToggleMusic"
-          hover-class="music-btn-hover"
-        >
-          <text class="music-icon">{{musicOn ? '🔊' : '🔇'}}</text>
-          <text class="music-label">{{musicOn ? '音乐开' : '音乐关'}}</text>
+        <view wx:if="{{showMusicButton}}" class="music-control">
+          <picker
+            bindchange="onMusicChange"
+            value="{{currentMusicIndex}}"
+            range="{{musicNames}}"
+            class="music-picker"
+          >
+            <view class="music-picker-display">
+              <text class="music-track-label">背景音乐</text>
+              <text class="music-track-name">{{currentMusicName}}</text>
+              <text class="music-picker-arrow">▼</text>
+            </view>
+          </picker>
+          <view
+            class="music-btn {{musicOn ? 'music-btn-on' : ''}}"
+            bindtap="onToggleMusic"
+            hover-class="music-btn-hover"
+          >
+            <text class="music-icon">{{musicOn ? '🔊' : '🔇'}}</text>
+            <text class="music-label">{{musicOn ? '暂停' : '播放'}}</text>
+          </view>
         </view>
       </view>
 
