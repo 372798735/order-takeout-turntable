@@ -13,6 +13,19 @@
     <view class="bg-sparkle"></view>
     <view class="bg-vignette"></view>
   </view>
+  <view wx:if="{{isMusicSwitching}}" class="music-switch-loading">
+    <view class="music-switch-spinner"></view>
+    <text>正在切换音乐</text>
+  </view>
+  <view wx:elif="{{musicOn}}" class="music-playing-tip">
+    <view class="music-equalizer" aria-hidden="true">
+      <view class="music-equalizer-bar"></view>
+      <view class="music-equalizer-bar"></view>
+      <view class="music-equalizer-bar"></view>
+    </view>
+    <text class="music-playing-label">正在播放</text>
+    <text class="music-playing-name">{{currentMusicName}}</text>
+  </view>
   <!-- 主内容区域 -->
   <view class="main">
     <!-- 转盘卡片 -->

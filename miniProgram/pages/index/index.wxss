@@ -19,6 +19,114 @@
   overflow: hidden;
 }
 
+.music-switch-loading {
+  position: fixed;
+  top: 20rpx;
+  right: 24rpx;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 16rpx;
+  border: 1rpx solid rgba(103, 80, 164, 0.16);
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.82);
+  color: #6750a4;
+  font-size: 22rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 58, 119, 0.08);
+}
+
+.music-playing-tip {
+  position: fixed;
+  top: 20rpx;
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  max-width: calc(100% - 48rpx);
+  min-height: 50rpx;
+  box-sizing: border-box;
+  padding: 10rpx 18rpx;
+  border: 1rpx solid rgba(103, 80, 164, 0.16);
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 6rpx 18rpx rgba(74, 58, 119, 0.1);
+  color: #6750a4;
+  transform: translateX(-50%);
+}
+
+.music-equalizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28rpx;
+  height: 26rpx;
+  gap: 4rpx;
+  margin-right: 10rpx;
+}
+
+.music-equalizer-bar {
+  width: 4rpx;
+  height: 12rpx;
+  border-radius: 2rpx;
+  background: #7c5ce8;
+  animation: musicEqualizer 0.9s ease-in-out infinite;
+}
+
+.music-equalizer-bar:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.music-equalizer-bar:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.music-playing-label {
+  flex-shrink: 0;
+  color: #766d91;
+  font-size: 22rpx;
+}
+
+.music-playing-name {
+  min-width: 0;
+  margin-left: 10rpx;
+  overflow: hidden;
+  color: #5b4b8a;
+  font-size: 23rpx;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-switch-spinner {
+  width: 18rpx;
+  height: 18rpx;
+  box-sizing: border-box;
+  border: 2rpx solid rgba(103, 80, 164, 0.2);
+  border-top-color: #6750a4;
+  border-radius: 50%;
+  animation: musicSwitchSpin 0.8s linear infinite;
+}
+
+@keyframes musicSwitchSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes musicEqualizer {
+  0%,
+  100% {
+    height: 10rpx;
+    opacity: 0.55;
+  }
+  50% {
+    height: 24rpx;
+    opacity: 1;
+  }
+}
+
 /* 底层：斜向渐变 + 深度 */
 .bg-base {
   position: absolute;

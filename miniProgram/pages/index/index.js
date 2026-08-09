@@ -29,6 +29,9 @@ const MUSIC_TRACKS = [
   },
 ];
 
+// Replace this value with the rewarded video ad unit ID from the WeChat Mini Program console.
+const MUSIC_REWARDED_VIDEO_AD_UNIT_ID = 'adunit-7988e8d5f3467e37';
+
 Page({
   data: {
     showMusicButton: true,
@@ -36,6 +39,7 @@ Page({
     musicNames: MUSIC_TRACKS.map((track) => track.title),
     currentMusicIndex: 0,
     currentMusicName: MUSIC_TRACKS[0].title,
+    isMusicSwitching: false,
     wheelSets: [],
     currentSetIndex: 0,
     currentSetId: null,
@@ -86,6 +90,7 @@ Page({
     app.globalData.isSpinning = false;
 
     this.initBgm();
+    this.initMusicRewardedAd();
   },
 
   onShow() {
@@ -103,13 +108,18 @@ Page({
       this._bgm.destroy();
       this._bgm = null;
     }
+    if (this._rewardedVideoAd) {
+      this._rewardedVideoAd.offClose();
+      this._rewardedVideoAd.offError();
+      this._rewardedVideoAd = null;
+    }
   },
 
   initBgm() {
     if (this._bgm) return;
 
     const settings = StorageManager.getAppSettings();
-    const musicOn = !!settings.bgmEnabled;
+    const musicOn = !!settings.bgmEnabled && !!app.globalData.musicAdUnlocked;
     this._bgmShouldPlay = musicOn;
     this._bgmReady = false;
 
@@ -200,6 +210,7 @@ Page({
       this._bgmReady = true;
       this._bgmLoadError = false;
       this._bgmSourceTrackIndex = this.data.currentMusicIndex;
+      this.setData({ isMusicSwitching: false });
 
       if (previousBgm) {
         previousBgm.stop();
@@ -215,6 +226,7 @@ Page({
         this._pendingBgm.destroy();
         this._pendingBgm = null;
         this._pendingMusicIndex = null;
+        this.setData({ isMusicSwitching: false });
         wx.showToast({
           title: '新音乐加载失败',
           icon: 'none',
@@ -222,6 +234,7 @@ Page({
       }
     });
 
+    this.setData({ isMusicSwitching: true });
     pendingBgm.src = track.url;
   },
 
@@ -263,45 +276,134 @@ Page({
     }
   },
 
-  onToggleMusic() {
-    const next = !this.data.musicOn;
-    const settings = StorageManager.getAppSettings();
-    StorageManager.setAppSettings({ ...settings, bgmEnabled: next });
-
-    this._bgmShouldPlay = next;
-
-    if (next) {
-      // 用户点击属于手势交互，可解锁 iOS/部分安卓的自动播放限制
-      if (!this._bgm) {
-        this.initBgm();
-      } else {
-        if (this._bgmSourceTrackIndex !== this.data.currentMusicIndex || this._bgmLoadError) {
-          this.setBgmSource(this.getCurrentMusic());
-        }
-        this.tryPlayBgm();
-      }
-    } else if (this._bgm) {
-      this._bgm.pause();
-      if (this._pendingBgm) {
-        this._pendingBgm.destroy();
-        this._pendingBgm = null;
-        this._pendingMusicIndex = null;
-      }
+  initMusicRewardedAd() {
+    if (
+      !wx.createRewardedVideoAd ||
+      MUSIC_REWARDED_VIDEO_AD_UNIT_ID === 'adunit-REPLACE_WITH_YOUR_ID'
+    ) {
+      console.warn('激励视频广告位 ID 尚未配置');
+      return;
     }
 
-    this.setData({ musicOn: next });
+    this._rewardedVideoAd = wx.createRewardedVideoAd({
+      adUnitId: MUSIC_REWARDED_VIDEO_AD_UNIT_ID,
+    });
 
+    this._rewardedVideoAd.onClose((res) => {
+      this._isShowingMusicAd = false;
+
+      // Older base libraries omit res after a completed ad.
+      if (!res || res.isEnded) {
+        app.globalData.musicAdUnlocked = true;
+        this.enableMusic();
+        return;
+      }
+
+      wx.showToast({
+        title: '需完整观看广告后才能播放',
+        icon: 'none',
+        duration: 2000,
+      });
+    });
+
+    this._rewardedVideoAd.onError((err) => {
+      console.error('激励视频广告加载失败:', err);
+      this.handleMusicAdUnavailable();
+    });
+  },
+
+  handleMusicAdUnavailable() {
+    if (!this._isShowingMusicAd) return;
+
+    this._isShowingMusicAd = false;
     wx.showToast({
-      title: next ? '音乐已开启' : '音乐已关闭',
+      title: '广告暂不可用，请稍后再试',
+      icon: 'none',
+      duration: 2000,
+    });
+  },
+
+  showMusicRewardedAd() {
+    if (this._isShowingMusicAd) return;
+
+    if (!this._rewardedVideoAd) {
+      wx.showModal({
+        title: '广告未配置',
+        content: '请先配置音乐激励视频广告位 ID。',
+        showCancel: false,
+      });
+      return;
+    }
+
+    this._isShowingMusicAd = true;
+    this._rewardedVideoAd
+      .show()
+      .catch(() => {
+        return this._rewardedVideoAd.load().then(() => this._rewardedVideoAd.show());
+      })
+      .catch((err) => {
+        console.error('激励视频广告展示失败:', err);
+        this.handleMusicAdUnavailable();
+      });
+  },
+
+  enableMusic() {
+    const settings = StorageManager.getAppSettings();
+    StorageManager.setAppSettings({ ...settings, bgmEnabled: true });
+    this._bgmShouldPlay = true;
+
+    if (!this._bgm) {
+      this.initBgm();
+    } else {
+      if (this._bgmSourceTrackIndex !== this.data.currentMusicIndex || this._bgmLoadError) {
+        this.setBgmSource(this.getCurrentMusic());
+      }
+      this.tryPlayBgm();
+    }
+
+    this.setData({ musicOn: true });
+    wx.showToast({
+      title: '音乐已开启',
       icon: 'none',
       duration: 1200,
     });
   },
 
+  onToggleMusic() {
+    const next = !this.data.musicOn;
+
+    if (next) {
+      if (!app.globalData.musicAdUnlocked) {
+        this.showMusicRewardedAd();
+        return;
+      }
+      this.enableMusic();
+    } else {
+      const settings = StorageManager.getAppSettings();
+      StorageManager.setAppSettings({ ...settings, bgmEnabled: false });
+      this._bgmShouldPlay = false;
+      if (this._bgm) {
+        this._bgm.pause();
+      }
+      if (this._pendingBgm) {
+        this._pendingBgm.destroy();
+        this._pendingBgm = null;
+        this._pendingMusicIndex = null;
+        this.setData({ isMusicSwitching: false });
+      }
+      this.setData({ musicOn: false });
+      wx.showToast({
+        title: '音乐已关闭',
+        icon: 'none',
+        duration: 1200,
+      });
+    }
+  },
+
   onMusicChange(e) {
     const currentMusicIndex = Number(e.detail.value);
     const track = MUSIC_TRACKS[currentMusicIndex];
-    if (!track) return;
+    if (!track || currentMusicIndex === this.data.currentMusicIndex) return;
 
     const shouldContinuePlaying = this.data.musicOn;
     this.setData({
